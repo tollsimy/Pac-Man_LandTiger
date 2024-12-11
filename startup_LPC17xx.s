@@ -24,7 +24,7 @@
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
-Stack_Size      EQU     0x00000200
+Stack_Size      EQU     0x00000400
 
                 AREA    STACK, NOINIT, READWRITE, ALIGN=3
 Stack_Mem       SPACE   Stack_Size
@@ -153,31 +153,28 @@ UsageFault_Handler\
                 B       .
                 ENDP
 
-; -------------- SVC HANDLER ------------------
-SVC_Handler  \
-		proc
-		export SVC_Handler
+SVC_Handler 	PROC
+				EXPORT SVC_Handler
 
-		push {r0-r12, lr}
-		tst lr, #2_0100
-		
-		mrseq   r1, msp ; We were using MSP
-		mrsne   r1, psp ; We were using PSP
+				push {r0-r12, lr}
+				tst lr, #2_0100
+				
+				mrseq   r1, msp ; We were using MSP
+				mrsne   r1, psp ; We were using PSP
 
-		ldreq   r0, [r1, #20*4] ; Current PC value, case MSP
-		ldrne   r0, [r1, #6*4 ] ; Current PC value, case PSP
+				ldreq   r0, [r1, #20*4] ; Current PC value, case MSP
+				ldrne   r0, [r1, #6*4 ] ; Current PC value, case PSP
 
-		ldr      r0, [r0, #-4]  ; Get SVC instruction
-		bic     r0, #0xFF000000 ; Get index
-		lsr     r0, #16			; Move index to LSBs
+				ldr     r0, [r0, #-4]  ; Get SVC instruction
+				bic     r0, #0xFF000000 ; Get index
+				lsr     r0, #16			; Move index to LSBs
 
-		; DO SOMETHING WITH index IN R0
-		
-		pop {r0-r12, lr}
-		bx lr	
-	
-		endp 
-; ----------- END SVC HANDLER ------------------
+				; DO SOMETHING WITH index IN R0
+				
+				pop {r0-r12, lr}
+				bx lr
+			
+				ENDP
 DebugMon_Handler\
                 PROC
                 EXPORT  DebugMon_Handler          [WEAK]

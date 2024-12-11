@@ -492,14 +492,14 @@ uint16_t LCD_GetPoint(uint16_t Xpos,uint16_t Ypos)
 * Return         : None
 * Attention		 : None
 *******************************************************************************/
-void LCD_SetPoint(uint16_t Xpos,uint16_t Ypos,uint16_t point)
+void LCD_SetPoint(uint16_t Xpos,uint16_t Ypos,uint16_t color)
 {
 	if( Xpos >= MAX_X || Ypos >= MAX_Y )
 	{
 		return;
 	}
 	LCD_SetCursor(Xpos,Ypos);
-	LCD_WriteReg(0x0022,point);
+	LCD_WriteReg(0x0022,color);
 }
 
 /******************************************************************************
@@ -594,7 +594,17 @@ void LCD_DrawLine( uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1 , uint16_t
         } 
         LCD_SetPoint(x0,y0,color);
 	}
-} 
+}
+
+void LCD_draw_circle(uint16_t xpos, uint16_t ypos, uint16_t r, uint16_t color){
+	for(int x=-r; x<r; x++){
+		for(int y=-r; y<r; y++){
+			if(x*x+y*y < r*r){
+				LCD_SetPoint(xpos+x,ypos+y,color);
+			}
+		}
+	}
+}
 
 /******************************************************************************
 * Function Name  : PutChar
@@ -666,7 +676,6 @@ void GUI_Text(uint16_t Xpos, uint16_t Ypos, uint8_t *str,uint16_t Color, uint16_
     }
     while ( *str != 0 );
 }
-
 
 /*********************************************************************************************************
       END FILE

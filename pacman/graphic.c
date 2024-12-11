@@ -1,0 +1,47 @@
+#include "pacman.h"
+
+static int get_x(char x){
+	return x*(CELL_SIZE_X);
+};
+
+static int get_y(char y){
+	return y*(CELL_SIZE_Y);
+};
+
+static void render_square(int x, int y, int width, int height, uint16_t color){
+	for(int i=x;i<x+width;i++){
+		for(int j=y;j<y+height;j++){
+			LCD_SetPoint(i,j,color);
+		}
+	}
+};
+
+void render_hor_wall(char i, char j){
+	int y = get_y(i);
+	int x = get_x(j);
+	render_square(x,y, CELL_SIZE_X, CELL_SIZE_Y, Blue);
+};
+void render_ver_wall(char i, char j){
+	
+};
+void render_pill(char i, char j){
+	int y = get_y(i) + CELL_SIZE_Y / 2;
+	int x = get_x(j) + CELL_SIZE_X / 2;
+	LCD_draw_circle(x,y,2,Yellow);
+};
+void render_power_pill(char i, char j){
+	int y = get_y(i) + CELL_SIZE_Y / 2;
+	int x = get_x(j) + CELL_SIZE_X / 2;
+	LCD_draw_circle(x,y,3,Red);
+};
+void render_player(char i, char j){
+	int y = get_y(i) + CELL_SIZE_Y / 2;
+	int x = get_x(j) + CELL_SIZE_X / 2;
+	LCD_draw_circle(x,y,5,Green);
+};
+
+void render_stats(struct game_t* game){
+	char time_str[30];
+	sprintf(time_str, "Time: %d, Lifes: %d, Score: %d", game->time, game->lifes, game->score);
+	GUI_Text(0, 300, (uint8_t*)time_str, White, Black);
+};

@@ -396,24 +396,19 @@
           <GroupName>main</GroupName>
           <Files>
             <File>
-              <FileName>sample.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\sample.c</FilePath>
-            </File>
-            <File>
               <FileName>include.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\include.h</FilePath>
             </File>
             <File>
-              <FileName>asm.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\asm.s</FilePath>
-            </File>
-            <File>
               <FileName>common.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\common.h</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\main.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -573,6 +568,41 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>pacman</GroupName>
+          <Files>
+            <File>
+              <FileName>pacman.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\pacman.c</FilePath>
+            </File>
+            <File>
+              <FileName>pacman.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\pacman\pacman.h</FilePath>
+            </File>
+            <File>
+              <FileName>graphic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\graphic.c</FilePath>
+            </File>
+            <File>
+              <FileName>play.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\play.c</FilePath>
+            </File>
+            <File>
+              <FileName>ready.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\ready.c</FilePath>
+            </File>
+            <File>
+              <FileName>reset.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\reset.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
@@ -620,7 +650,7 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>.\Objects\</OutputDirectory>
+          <OutputDirectory>.\output\</OutputDirectory>
           <OutputName>sample</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
@@ -886,7 +916,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>5</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>0</OneElfS>
@@ -967,24 +997,19 @@
           <GroupName>main</GroupName>
           <Files>
             <File>
-              <FileName>sample.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\sample.c</FilePath>
-            </File>
-            <File>
               <FileName>include.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\include.h</FilePath>
             </File>
             <File>
-              <FileName>asm.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\asm.s</FilePath>
-            </File>
-            <File>
               <FileName>common.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\common.h</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\main.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1140,6 +1165,41 @@
               <FileName>lib_adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\adc\lib_adc.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>pacman</GroupName>
+          <Files>
+            <File>
+              <FileName>pacman.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\pacman.c</FilePath>
+            </File>
+            <File>
+              <FileName>pacman.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\pacman\pacman.h</FilePath>
+            </File>
+            <File>
+              <FileName>graphic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\graphic.c</FilePath>
+            </File>
+            <File>
+              <FileName>play.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\play.c</FilePath>
+            </File>
+            <File>
+              <FileName>ready.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\ready.c</FilePath>
+            </File>
+            <File>
+              <FileName>reset.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\reset.c</FilePath>
             </File>
           </Files>
         </Group>
