@@ -40,8 +40,22 @@ void render_player(char i, char j){
 	LCD_draw_circle(x,y,5,Green);
 };
 
-void render_stats(struct game_t* game){
+void render_stats(game_t* game){
 	char time_str[30];
 	sprintf(time_str, "Time: %d, Lifes: %d, Score: %d", game->time, game->lifes, game->score);
 	GUI_Text(0, 300, (uint8_t*)time_str, White, Black);
+};
+
+void render_countdown(uint8_t count){
+	render_square(70,120, 80, 50, Red);
+	char count_str[20];
+	sprintf(count_str, "%dS", count);
+	GUI_Text(105,135,(uint8_t*)count_str, Yellow, Red);
+};
+
+void render_new_p_pos(int old_player_x, int old_player_y, int player_x, int player_y){
+	int y = get_y(old_player_y);
+	int x = get_x(old_player_x);
+	render_square(x, y, CELL_SIZE_X, CELL_SIZE_Y, Black);
+	render_player(player_y, player_x);
 };

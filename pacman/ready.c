@@ -5,7 +5,7 @@
 
 extern uint8_t btn_flag;
 
-void draw_game(enum cell_t grid[GRID_HEIGHT][GRID_WIDTH], struct game_t* game){
+void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	LCD_Clear(Black);
 	render_stats(game);
 	for(int i=0; i<GRID_HEIGHT; i++){

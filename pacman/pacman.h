@@ -9,6 +9,9 @@
 #define INITIAL_LIFES 3
 #define INITIAL_SCORE 0
 
+#define PLAYER_INITIAL_POS_X 13
+#define PLAYER_INITIAL_POS_Y 17
+
 #define GRID_RES_X 240
 #define GRID_RES_Y 300
 
@@ -18,23 +21,25 @@
 #define CELL_SIZE_X GRID_RES_X/GRID_WIDTH
 #define CELL_SIZE_Y GRID_RES_Y/GRID_HEIGHT
 
-enum cell_t {
+volatile typedef enum {
 	EMPTY,
 	PILL,
 	POWER_PILL,
 	HOR_WALL,
 	VER_WALL,
 	PLAYER,
-};
+} cell_t;
 
-struct game_t {
+volatile typedef struct {
 	char pills;
 	char lifes;
 	char time;
 	int score;
-};
+	int player_x;
+	int player_y;
+} game_t;
 
-typedef enum {
+volatile typedef enum {
 	STATE_RESET,
 	STATE_READY,
 	STATE_PLAY,
@@ -49,12 +54,14 @@ void render_ver_wall(char i, char j);
 void render_pill(char i, char j);
 void render_power_pill(char i, char j);
 void render_player(char i, char j);
-void render_stats(struct game_t* game);
+void render_stats(game_t* game);
+void render_countdown(uint8_t count);
+void render_new_p_pos(int old_player_x, int old_player_y, int player_x, int player_y);
 // reset.c
 void wait_ready(void);
 // ready.c
-void draw_game(enum cell_t grid[GRID_HEIGHT][GRID_WIDTH], struct game_t* game);
+void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 // play.c
-uint8_t play_game(enum cell_t grid[GRID_HEIGHT][GRID_WIDTH], struct game_t* game);
+uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 
 #endif
