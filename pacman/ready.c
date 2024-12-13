@@ -3,7 +3,7 @@
 #include "../GLCD/AsciiLib.h"
 #include "../GLCD/GLCD.h"
 
-extern uint8_t btn_flag;
+extern volatile uint8_t btn_flag;
 
 void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	LCD_Clear(Black);

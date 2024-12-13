@@ -13,6 +13,21 @@ uint32_t timer_get_counter(uint8_t timer_num) {
 	}
 }
 
+/* Simple busy waiting delay */
+void delay_ms(uint32_t time_ms, uint16_t timer){
+	struct timer_configuration tc = {
+		.timer_n = timer,
+		.prescale = 0,
+		.mr0 = TIM_MS_TO_TICKS_SIMPLE(time_ms),
+		.configuration_mr0 = 0,
+	};
+	init_timer(&tc);
+	reset_timer(tc.timer_n);
+	enable_timer(tc.timer_n, PRIO_3);
+	while(timer_get_counter(tc.timer_n) < TIM_MS_TO_TICKS_SIMPLE(time_ms));
+	disable_timer(tc.timer_n);
+}
+	
 void enable_timer( uint8_t timer_num, uint8_t priority){
 	if (timer_num == TIMER_0){
 		LPC_TIM0->TCR = 1;

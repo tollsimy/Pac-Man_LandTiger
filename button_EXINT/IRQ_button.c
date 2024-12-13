@@ -1,9 +1,9 @@
 #include "button.h"
 #include "../RIT/RIT.h"
 
-extern int pressed_button_0;
-extern int pressed_button_1;
-extern int pressed_button_2;
+extern volatile int pressed_button_0;
+extern volatile int pressed_button_1;
+extern volatile int pressed_button_2;
 
 void EINT0_IRQHandler(void){
 	// Variable set to 1	

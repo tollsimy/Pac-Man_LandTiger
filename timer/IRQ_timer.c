@@ -1,9 +1,12 @@
 #include "timer.h"
 #include "../common.h"
+#include "../pacman/pacman.h"
 
 /*
 	in IR si deve settare il bit associato al MR di cui si vuole cancellare l'interruzione.
 */
+
+extern void pacman_timer_IRQ();
 
 void TIMER0_IRQHandler (void){
 	uint8_t irq_source = LPC_TIM0->IR;
@@ -27,7 +30,7 @@ void TIMER1_IRQHandler (void){
 	uint8_t irq_source = LPC_TIM1->IR;
 	
 	if(irq_source & IR_MR0) { // mr0
-		
+		pacman_timer_IRQ();
 	} else if(irq_source & IR_MR1) { // mr1
 		
 	} else if(irq_source & IR_MR2) { // mr2

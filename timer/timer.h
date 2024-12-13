@@ -41,6 +41,7 @@ struct timer_configuration{
 
 /* init_timer.c */
 uint32_t timer_get_counter(uint8_t timer_num);
+void delay_ms(uint32_t time_ms, uint16_t timer);
 void enable_timer(uint8_t timer_n, uint8_t prio);
 void disable_timer(uint8_t timer_n);
 void init_timer (struct timer_configuration* tm);

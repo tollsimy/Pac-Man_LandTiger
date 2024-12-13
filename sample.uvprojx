@@ -414,13 +414,6 @@
         </Group>
         <Group>
           <GroupName>lib_SoC_board</GroupName>
-          <Files>
-            <File>
-              <FileName>system_LPC17xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\system_LPC17xx.c</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>led</GroupName>
@@ -526,6 +519,11 @@
           <GroupName>GLCD</GroupName>
           <Files>
             <File>
+              <FileName>system_LPC17xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\system_LPC17xx.c</FilePath>
+            </File>
+            <File>
               <FileName>AsciiLib.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\GLCD\AsciiLib.c</FilePath>
@@ -599,6 +597,11 @@
               <FileName>reset.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\pacman\reset.c</FilePath>
+            </File>
+            <File>
+              <FileName>pacman_IRQ.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\pacman_IRQ.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -916,7 +919,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>2</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>0</OneElfS>
@@ -1015,13 +1018,6 @@
         </Group>
         <Group>
           <GroupName>lib_SoC_board</GroupName>
-          <Files>
-            <File>
-              <FileName>system_LPC17xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\system_LPC17xx.c</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>led</GroupName>
@@ -1127,6 +1123,11 @@
           <GroupName>GLCD</GroupName>
           <Files>
             <File>
+              <FileName>system_LPC17xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\system_LPC17xx.c</FilePath>
+            </File>
+            <File>
               <FileName>AsciiLib.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\GLCD\AsciiLib.c</FilePath>
@@ -1200,6 +1201,11 @@
               <FileName>reset.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\pacman\reset.c</FilePath>
+            </File>
+            <File>
+              <FileName>pacman_IRQ.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\pacman_IRQ.c</FilePath>
             </File>
           </Files>
         </Group>

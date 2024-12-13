@@ -14,7 +14,7 @@
 
 const unsigned long led_mask[] = { 1UL<<0, 1UL<<1, 1UL<<2, 1UL<< 3, 1UL<< 4, 1UL<< 5, 1UL<< 6, 1UL<< 7 };
 
-extern unsigned char led_value;
+extern volatile unsigned char led_value;
 
 /*----------------------------------------------------------------------------
   Function that turns on requested LED

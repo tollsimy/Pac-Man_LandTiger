@@ -4,7 +4,7 @@
 #include "inttypes.h"
 
 /*SystemFrequency defined in file system_LPC17xx.c initialized during SystemInit()*/
-extern uint32_t SystemFrequency;
+extern volatile uint32_t SystemFrequency;
 
 //IRQ priorities
 #define PRIO_0 0U

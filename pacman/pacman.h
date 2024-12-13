@@ -6,8 +6,9 @@
 
 #define INITIAL_TIME 	60
 #define INITIAL_PILLS 240
-#define INITIAL_LIFES 3
+#define INITIAL_LIFES 1
 #define INITIAL_SCORE 0
+#define INITIAL_POWER_PILLS 6
 
 #define PLAYER_INITIAL_POS_X 13
 #define PLAYER_INITIAL_POS_Y 17
@@ -30,13 +31,28 @@ volatile typedef enum {
 	PLAYER,
 } cell_t;
 
+volatile typedef enum {
+	STOP,
+	RIGHT,
+	LEFT,
+	DOWN,
+	UP,
+} dir_t;
+
 volatile typedef struct {
 	char pills;
+	char power_pills;
+	char power_pills_spawn;
 	char lifes;
 	char time;
 	int score;
 	int player_x;
 	int player_y;
+	dir_t dir;
+	dir_t next_dir;
+	uint8_t victory;
+	uint32_t pp_spawn_counter;
+	char pause;
 } game_t;
 
 volatile typedef enum {
@@ -57,11 +73,19 @@ void render_player(char i, char j);
 void render_stats(game_t* game);
 void render_countdown(uint8_t count);
 void render_new_p_pos(int old_player_x, int old_player_y, int player_x, int player_y);
+void render_pause(game_t* game);
 // reset.c
+void init_game(game_t* game);
 void wait_ready(void);
 // ready.c
 void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 // play.c
 uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+char update_game_time(game_t* game);
+void spawn_random_pp(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+void win(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+void loose(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+// pacman_IRQ.c
+void pacman_timer_IRQ();
 
 #endif
