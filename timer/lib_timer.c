@@ -24,7 +24,13 @@ void delay_ms(uint32_t time_ms, uint16_t timer){
 	init_timer(&tc);
 	reset_timer(tc.timer_n);
 	enable_timer(tc.timer_n, PRIO_3);
-	while(timer_get_counter(tc.timer_n) < tc.mr0);
+	
+	// Read again match register in case of simulator
+	// because simulator scales the value
+	LPC_TIM_TypeDef* timer_struct = NULL;
+	uint32_t mr0 = timer_struct->MR0;
+	
+	while(timer_get_counter(tc.timer_n) < mr0);
 	disable_timer(tc.timer_n);
 }
 	
