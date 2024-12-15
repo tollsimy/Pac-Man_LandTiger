@@ -24,7 +24,7 @@ void delay_ms(uint32_t time_ms, uint16_t timer){
 	init_timer(&tc);
 	reset_timer(tc.timer_n);
 	enable_timer(tc.timer_n, PRIO_3);
-	while(timer_get_counter(tc.timer_n) < TIM_MS_TO_TICKS_SIMPLE(time_ms));
+	while(timer_get_counter(tc.timer_n) < tc.mr0);
 	disable_timer(tc.timer_n);
 }
 	
@@ -109,7 +109,7 @@ void init_timer (struct timer_configuration* tc){
 	timer->IR = timer->IR; // reset irq flag
 	
 	timer->PR = tc->prescale;
-	
+
 	timer->MR0 = tc->mr0;
 	timer->MR1 = tc->mr1;
 	timer->MR2 = tc->mr2;

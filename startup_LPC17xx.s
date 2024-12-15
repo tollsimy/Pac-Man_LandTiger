@@ -154,26 +154,8 @@ UsageFault_Handler\
                 ENDP
 
 SVC_Handler 	PROC
-				EXPORT SVC_Handler
-
-				push {r0-r12, lr}
-				tst lr, #2_0100
-				
-				mrseq   r1, msp ; We were using MSP
-				mrsne   r1, psp ; We were using PSP
-
-				ldreq   r0, [r1, #20*4] ; Current PC value, case MSP
-				ldrne   r0, [r1, #6*4 ] ; Current PC value, case PSP
-
-				ldr     r0, [r0, #-4]  ; Get SVC instruction
-				bic     r0, #0xFF000000 ; Get index
-				lsr     r0, #16			; Move index to LSBs
-
-				; DO SOMETHING WITH index IN R0
-				
-				pop {r0-r12, lr}
-				bx lr
-			
+				EXPORT	SVC_Handler				  [WEAK]
+				B		.
 				ENDP
 DebugMon_Handler\
                 PROC
