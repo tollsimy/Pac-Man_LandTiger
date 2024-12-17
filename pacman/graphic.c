@@ -72,6 +72,20 @@ void render_stats(game_t* game){
 	GUI_Text(0, 300, (uint8_t*)time_str, White, Black);
 };
 
+void update_stats(game_t* game){
+	char str[10];
+	sprintf(str, "%d", game->lifes);
+	GUI_Text(135, 300, (uint8_t*)str, White, Black);
+	sprintf(str, "%d", game->score);
+	GUI_Text(210, 300, (uint8_t*)str, White, Black);
+};
+
+void update_time(game_t* game){
+	char str[10];
+	sprintf(str, "%d", game->time);
+	GUI_Text(49, 300, (uint8_t*)str, White, Black);
+};
+
 void render_countdown(uint8_t count){
 	render_square(70,120, 80, 50, Red);
 	char count_str[20];

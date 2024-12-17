@@ -71,6 +71,8 @@ void render_pill(char i, char j);
 void render_power_pill(char i, char j);
 void render_player(char i, char j);
 void render_stats(game_t* game);
+void update_stats(game_t* game);
+void update_time(game_t* game);
 void render_countdown(uint8_t count);
 void render_new_p_pos(int old_player_x, int old_player_y, int player_x, int player_y);
 void render_pause(game_t* game);

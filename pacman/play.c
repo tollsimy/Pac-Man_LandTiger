@@ -57,7 +57,7 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 			if(game->score % 1000 == 0 && game->score != 0){
 				game->lifes += 1;
 			}
-			render_stats(game);
+			update_stats(game);
 			// do not advance anymore when pills finished
 			if(game->pills == 0 && game->power_pills == 0){
 				break;
@@ -92,7 +92,7 @@ char update_game_time(game_t* game){
 		if(game->time > 0){
 			game->time -= 1;
 		}
-		render_stats(game);
+		update_time(game);
 	}
 	return game->time;
 }
@@ -191,6 +191,7 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 			game->victory = 0;
 			break;
 		}
+		__ASM("wfi");
 	}
 
 	return game->victory;
