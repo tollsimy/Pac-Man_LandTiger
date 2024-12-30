@@ -179,6 +179,7 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	enable_timer(tc.timer_n, PRIO_3);
 		
 	while(1){
+		__ASM("wfi");
 		input_handler(grid, game);
 		if(game->dir != STOP){
 			move(grid, game);
@@ -191,9 +192,8 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 			game->victory = 0;
 			break;
 		}
-		__ASM("wfi");
 	}
-
+	disable_timer(1);
 	return game->victory;
 }
 
