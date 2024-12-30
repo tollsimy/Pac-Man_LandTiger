@@ -67,22 +67,22 @@ void render_player(char i, char j){
 };
 
 void render_stats(game_t* game){
-	char time_str[30];
-	sprintf(time_str, "Time: %d, Lifes: %d, Score:%d", game->time, game->lifes, game->score);
+	char time_str[40];
+	sprintf(time_str, "Time: %02d, Lifes: %01d, Score:%04d", game->time, game->lifes, game->score);
 	GUI_Text(0, 300, (uint8_t*)time_str, White, Black);
 };
 
 void update_stats(game_t* game){
 	char str[10];
-	sprintf(str, "%d", game->lifes);
+	sprintf(str, "%01d", game->lifes);
 	GUI_Text(135, 300, (uint8_t*)str, White, Black);
-	sprintf(str, "%d", game->score);
+	sprintf(str, "%04d", game->score);
 	GUI_Text(210, 300, (uint8_t*)str, White, Black);
 };
 
 void update_time(game_t* game){
 	char str[10];
-	sprintf(str, "%d", game->time);
+	sprintf(str, "%02d", game->time);
 	GUI_Text(49, 300, (uint8_t*)str, White, Black);
 };
 
