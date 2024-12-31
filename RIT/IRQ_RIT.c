@@ -1,10 +1,8 @@
 #include "RIT.h"
-#include "../led/led.h"
 #include "../common.h"
 #include "../timer/timer.h"
 #include "../joystick/joystick.h"
 #include "../button_EXINT/button.h"
-#include "../adc/adc.h"
 
 volatile uint32_t pressed_button_0 = 0;
 volatile uint32_t pressed_button_1 = 0;
@@ -127,12 +125,6 @@ void RIT_IRQHandler(void){
 				LPC_PINCON->PINSEL4 |= (1 << 24);
 			}
 	}
-	
-	// -------------------------------
-	// ADC Conversion
-	// -------------------------------
-	
-	// ADC_start_conversion();
 	
 	LPC_RIT->RICTRL |= 0x1;
 }

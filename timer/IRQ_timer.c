@@ -2,10 +2,6 @@
 #include "../common.h"
 #include "../pacman/pacman.h"
 
-/*
-	in IR si deve settare il bit associato al MR di cui si vuole cancellare l'interruzione.
-*/
-
 extern void pacman_timer_IRQ();
 
 void TIMER0_IRQHandler (void){

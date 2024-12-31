@@ -140,15 +140,12 @@ static void input_handler(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 }
 
 void pause_handler(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
-	if(btn_flag & FLAG_BUTTON_0){
-		btn_flag &= ~FLAG_BUTTON_0;
-		game->pause = 1;
-		render_pause(game);
-		while(!(btn_flag & FLAG_BUTTON_0));
-		btn_flag &= ~FLAG_BUTTON_0;
-		game->pause = 0;
-		draw_game(grid, game);
-	}
+	game->pause = 1;
+	render_pause(game);
+	while(!(btn_flag & FLAG_BUTTON_0));
+	btn_flag &= ~FLAG_BUTTON_0;
+	game->pause = 0;
+	draw_game(grid, game);
 }
 
 uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
@@ -184,7 +181,10 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		if(game->dir != STOP){
 			move(grid, game);
 		}
-		pause_handler(grid, game);
+		if(btn_flag & FLAG_BUTTON_0){
+			btn_flag &= ~FLAG_BUTTON_0;
+			pause_handler(grid, game);
+		}
 		if(game->pills == 0 && game->power_pills == 0){
 			break;
 		}
