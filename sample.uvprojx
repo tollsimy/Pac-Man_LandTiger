@@ -414,6 +414,13 @@
         </Group>
         <Group>
           <GroupName>lib_SoC_board</GroupName>
+          <Files>
+            <File>
+              <FileName>system_LPC17xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\system_LPC17xx.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>led</GroupName>
@@ -518,11 +525,6 @@
         <Group>
           <GroupName>GLCD</GroupName>
           <Files>
-            <File>
-              <FileName>system_LPC17xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\system_LPC17xx.c</FilePath>
-            </File>
             <File>
               <FileName>AsciiLib.c</FileName>
               <FileType>1</FileType>
@@ -1018,6 +1020,13 @@
         </Group>
         <Group>
           <GroupName>lib_SoC_board</GroupName>
+          <Files>
+            <File>
+              <FileName>system_LPC17xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\system_LPC17xx.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>led</GroupName>
@@ -1122,11 +1131,6 @@
         <Group>
           <GroupName>GLCD</GroupName>
           <Files>
-            <File>
-              <FileName>system_LPC17xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\system_LPC17xx.c</FilePath>
-            </File>
             <File>
               <FileName>AsciiLib.c</FileName>
               <FileType>1</FileType>
