@@ -51,7 +51,7 @@ volatile typedef struct {
 	int player_y;
 	dir_t dir;
 	dir_t next_dir;
-	uint8_t victory;
+	int8_t victory;
 	uint32_t pp_spawn_counter;
 	char pause;
 } game_t;
