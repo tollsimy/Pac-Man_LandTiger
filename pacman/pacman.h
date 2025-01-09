@@ -29,6 +29,7 @@ volatile typedef enum {
 	HOR_WALL,
 	VER_WALL,
 	PLAYER,
+	GATE,
 } cell_t;
 
 volatile typedef enum {
@@ -70,12 +71,13 @@ void render_ver_wall(char i, char j);
 void render_pill(char i, char j);
 void render_power_pill(char i, char j);
 void render_player(char i, char j);
+void render_gate(char i, char j);
 void render_stats(game_t* game);
 void update_stats(game_t* game);
 void update_time(game_t* game);
 void render_countdown(uint8_t count);
 void render_new_p_pos(int old_player_x, int old_player_y, int player_x, int player_y);
-void render_pause(game_t* game);
+void render_pause();
 // reset.c
 void init_game(game_t* game);
 void wait_ready(void);
@@ -85,8 +87,8 @@ void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 char update_game_time(game_t* game);
 void spawn_random_pp(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
-void win(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
-void loose(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+void win();
+void loose();
 // pacman_IRQ.c
 void pacman_timer_IRQ();
 

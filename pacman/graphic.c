@@ -65,6 +65,12 @@ void render_player(char i, char j){
 	int x = get_x(j) + CELL_SIZE_X / 2;
 	LCD_draw_circle(x,y,4,Green);
 };
+void render_gate(char i, char j){
+	int y = get_y(i);
+	int x = get_x(j);
+	//render_square(x, y, CELL_SIZE_X, CELL_SIZE_Y, Black);
+	render_square(x,y, CELL_SIZE_X, CELL_SIZE_Y, Yellow);
+};
 
 void render_stats(game_t* game){
 	char time_str[40];
@@ -100,7 +106,7 @@ void render_new_p_pos(int old_player_x, int old_player_y, int player_x, int play
 	render_player(player_y, player_x);
 };
 
-void render_pause(game_t* game){
+void render_pause(){
 	render_square(70,120, 80, 50, White);
 	GUI_Text(105,135,(uint8_t*)"Pause", Yellow, White);
 }

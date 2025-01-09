@@ -36,7 +36,7 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 			new_player_y = GRID_HEIGHT-1;
 		}
 		
-		if(grid[new_player_y][new_player_x] != HOR_WALL && grid[new_player_y][new_player_x] != VER_WALL) {
+		if(grid[new_player_y][new_player_x] != HOR_WALL && grid[new_player_y][new_player_x] != VER_WALL && grid[new_player_y][new_player_x] != GATE) {
 			game->player_x = new_player_x;
 			game->player_y = new_player_y;
 			if(grid[game->player_y][game->player_x] == PILL){
@@ -58,12 +58,14 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 				game->lifes += 1;
 			}
 			update_stats(game);
-			// do not advance anymore when pills finished
+			// victory, do not advance anymore when pills finished
 			if(game->pills == 0 && game->power_pills == 0){
+				game->victory = 1;
 				break;
 			}
-			// do not advance anymore when time elapsed
+			// game over, do not advance anymore when time elapsed
 			if(game->time == 0){
+				game->victory = 0;
 				break;
 			}
 			// if user changed dir
@@ -73,7 +75,7 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 				new_player_y += game->next_dir == DOWN ? 1 : 0;
 				new_player_x += game->next_dir == RIGHT ? 1 : 0;
 				new_player_x += game->next_dir == LEFT ? -1 : 0;
-				if(grid[new_player_y][new_player_x] != HOR_WALL && grid[new_player_y][new_player_x] != VER_WALL) {
+				if(grid[new_player_y][new_player_x] != HOR_WALL && grid[new_player_y][new_player_x] != VER_WALL && grid[new_player_y][new_player_x] != GATE) {
 					game->dir = game->next_dir;
 					game->next_dir = STOP;
 				}
@@ -115,7 +117,7 @@ void spawn_random_pp(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	}
 }
 
-static void input_handler(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
+static void input_handler(game_t* game){
 	if(joystick_flag & FLAG_JOYSTICK_UP) {
 		joystick_flag &= ~FLAG_JOYSTICK_UP;
 		game->next_dir = UP;
@@ -141,8 +143,8 @@ static void input_handler(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 
 void pause_handler(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	game->pause = 1;
-	render_pause(game);
-	while(!(btn_flag & FLAG_BUTTON_0));
+	render_pause();
+	while(!(btn_flag & FLAG_BUTTON_0)){ __ASM("wfi"); };
 	btn_flag &= ~FLAG_BUTTON_0;
 	game->pause = 0;
 	draw_game(grid, game);
@@ -177,36 +179,34 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		
 	while(1){
 		__ASM("wfi");
-		input_handler(grid, game);
-		if(game->dir != STOP){
-			move(grid, game);
-		}
-		if(btn_flag & FLAG_BUTTON_0){
-			btn_flag &= ~FLAG_BUTTON_0;
-			pause_handler(grid, game);
-		}
-		if(game->pills == 0 && game->power_pills == 0){
-			break;
-		}
-		if(game->time == 0){
-			game->victory = 0;
-			break;
+		// Repeat until all flags cleared
+		while(joystick_flag || game->dir != STOP || btn_flag & FLAG_BUTTON_0){
+			if(joystick_flag){
+				input_handler(game);
+			}
+			if(game->dir != STOP){
+				move(grid, game);
+			}
+			if(btn_flag & FLAG_BUTTON_0){
+				btn_flag &= ~FLAG_BUTTON_0;
+				pause_handler(grid, game);
+			}
 		}
 	}
 	disable_timer(1);
 	return game->victory;
 }
 
-void win(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
+void win(){
 	GUI_Text(100, 100, (uint8_t*) "Victory!", Yellow, Black);
 	GUI_Text(80, 120, (uint8_t*) "KEY1 to restart!", Yellow, Black);
-	while(!(btn_flag & FLAG_BUTTON_1));
+	while(!(btn_flag & FLAG_BUTTON_1)){ __ASM("wfi"); };
 	btn_flag &= ~FLAG_BUTTON_1;
 }
 
-void loose(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
+void loose(){
 	GUI_Text(100, 100, (uint8_t*) "Game Over!", Yellow, Black);
 	GUI_Text(80, 120, (uint8_t*) "KEY1 to restart!", Yellow, Black);
-	while(!(btn_flag & FLAG_BUTTON_1));
+	while(!(btn_flag & FLAG_BUTTON_1)){ __ASM("wfi"); };
 	btn_flag &= ~FLAG_BUTTON_1;
 }

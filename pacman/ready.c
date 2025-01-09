@@ -26,6 +26,9 @@ void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 				case PLAYER:
 					render_player(i,j);
 					break;
+				case GATE:
+					render_gate(i,j);
+					break;
 				case EMPTY:
 					break;
 			}
