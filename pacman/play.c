@@ -181,8 +181,8 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		
 	while(1){
 		__ASM("wfi");
-		// Repeat until all flags cleared
-		while(joystick_flag || game->dir != STOP || btn_flag & FLAG_BUTTON_0){
+		// Repeat until all flags cleared and game not ended
+		while((joystick_flag || game->dir != STOP || btn_flag & FLAG_BUTTON_0) && game->victory == -1){
 			if(joystick_flag){
 				input_handler(game);
 			}
@@ -194,6 +194,7 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 				pause_handler(grid, game);
 			}
 		}
+		if(game->victory != -1){ break; }
 	}
 	disable_timer(1);
 	return game->victory;

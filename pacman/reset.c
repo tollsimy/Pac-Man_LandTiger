@@ -13,7 +13,7 @@ void init_game(game_t* game){
 	game->player_y = PLAYER_INITIAL_POS_Y;
 	game->dir = STOP;
 	game->next_dir = STOP;
-	game->victory = 1;
+	game->victory = -1;
 	game->pp_spawn_counter = 0;
 	game->pause = 0;
 }
