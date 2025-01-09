@@ -22,7 +22,8 @@ int main (void) {
 	
 	// RIT WORKS WITH CLOCK = 100MHZ
 	// ONE INTERRUPT EVERY 50ms
-	init_RIT(RIT_MS_TO_TICKS(RIT_PERIOD_MS)); enable_RIT();
+	init_RIT(RIT_MS_TO_TICKS(RIT_PERIOD_MS)); 
+	enable_RIT();
 	
 	LPC_SC->PCON |= 0x1;					// PM0=1
 	LPC_SC->PCON &= 0xFFFFFFFFD;	// PM1=0

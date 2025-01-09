@@ -12,22 +12,22 @@ void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		for(int j=0; j<GRID_WIDTH; j++){
 			switch(grid[i][j]){
 				case HOR_WALL:
-					render_hor_wall(i,j);
+					render_hor_wall(j,i);
 					break;
 				case VER_WALL:
-					render_ver_wall(i,j);
+					render_ver_wall(j,i);
 					break;
 				case PILL:
-					render_pill(i,j);
+					render_pill(j,i);
 					break;
 				case POWER_PILL:
-					render_power_pill(i,j);
+					render_power_pill(j,i);
 					break;
 				case PLAYER:
-					render_player(i,j);
+					render_player(j,i);
 					break;
 				case GATE:
-					render_gate(i,j);
+					render_gate(j,i);
 					break;
 				case EMPTY:
 					break;

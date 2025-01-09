@@ -113,7 +113,7 @@ void spawn_random_pp(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 			}
 			while(grid[rand_y][rand_x] != PILL);
 			grid[rand_y][rand_x] = POWER_PILL;
-			render_power_pill(rand_y,rand_x);
+			render_power_pill(rand_x,rand_y);
 	}
 }
 
@@ -143,11 +143,11 @@ static void input_handler(game_t* game){
 
 void pause_handler(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	game->pause = 1;
-	render_pause();
+	render_pause(1);
 	while(!(btn_flag & FLAG_BUTTON_0)){ __ASM("wfi"); };
 	btn_flag &= ~FLAG_BUTTON_0;
 	game->pause = 0;
-	draw_game(grid, game);
+	render_pause(0);
 }
 
 uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
@@ -159,6 +159,7 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		render_countdown(count);
 		count--;
 	}
+	clear_countdown();
 	
 	uint32_t game_timer_1s = 1000;
 	struct timer_configuration tc = {
@@ -174,7 +175,8 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	game->pp_spawn_counter = (rand() % (INITIAL_TIME / (INITIAL_POWER_PILLS - 1)));
 	
 	add_player(grid, game);
-	draw_game(grid, game);
+	render_player(game->player_x, game->player_y);
+	
 	enable_timer(tc.timer_n, PRIO_3);
 		
 	while(1){

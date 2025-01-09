@@ -16,6 +16,9 @@
 #define GRID_RES_X 240
 #define GRID_RES_Y 300
 
+#define BORDER_X 8
+#define BORDER_Y 25
+
 #define GRID_WIDTH 28
 #define GRID_HEIGHT 31
 
@@ -66,18 +69,19 @@ volatile typedef enum {
 
 void pacman();
 // graphic.c
-void render_hor_wall(char i, char j);
-void render_ver_wall(char i, char j);
-void render_pill(char i, char j);
-void render_power_pill(char i, char j);
-void render_player(char i, char j);
-void render_gate(char i, char j);
+void render_hor_wall(char x, char y);
+void render_ver_wall(char x, char y);
+void render_pill(char x, char y);
+void render_power_pill(char x, char y);
+void render_player(char x, char y);
+void render_gate(char x, char y);
 void render_stats(game_t* game);
 void update_stats(game_t* game);
 void update_time(game_t* game);
 void render_countdown(uint8_t count);
+void clear_countdown();
 void render_new_p_pos(int old_player_x, int old_player_y, int player_x, int player_y);
-void render_pause();
+void render_pause(char val);
 // reset.c
 void init_game(game_t* game);
 void wait_ready(void);
