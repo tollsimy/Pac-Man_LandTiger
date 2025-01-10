@@ -168,7 +168,7 @@ void render_stats(game_t* game){
 	}
 };
 
-void update_stats(game_t* game){
+void update_render_stats(game_t* game){
 	char str[10];
 	sprintf(str, "%04d", game->score);
 	GUI_Text(167, 5, (uint8_t*)str, White, Black);

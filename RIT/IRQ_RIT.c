@@ -3,6 +3,7 @@
 #include "../timer/timer.h"
 #include "../joystick/joystick.h"
 #include "../button_EXINT/button.h"
+#include "../pacman/pacman.h"
 
 volatile uint32_t pressed_button_0 = 0;
 volatile uint32_t pressed_button_1 = 0;
@@ -17,6 +18,9 @@ uint32_t pressed_joystick_select = 0;
 volatile uint8_t joystick_flag = 0;
 volatile uint8_t btn_flag = 0;
 
+extern game_t game;
+extern void pause_handler(game_t* game, int pause_val);
+
 void RIT_IRQHandler(void){	
 	
 	// -------------------------------
@@ -26,7 +30,9 @@ void RIT_IRQHandler(void){
 	if(joystick_check_dir(JOYSTICK_UP)){
 		pressed_joystick_up++;
 		if(pressed_joystick_up == 1) {
-			joystick_flag |= FLAG_JOYSTICK_UP;
+			//joystick_flag |= FLAG_JOYSTICK_UP;
+			game.next_dir = UP;
+			//joystick_flag &= ~FLAG_JOYSTICK_UP;
 		}
 	}
 	else pressed_joystick_up = 0;
@@ -38,7 +44,9 @@ void RIT_IRQHandler(void){
 	if(joystick_check_dir(JOYSTICK_DOWN)){
 		pressed_joystick_down++;
 		if(pressed_joystick_down == 1) {
-			joystick_flag |= FLAG_JOYSTICK_DOWN;
+			//joystick_flag |= FLAG_JOYSTICK_DOWN;
+			game.next_dir = DOWN;
+			//joystick_flag &= ~FLAG_JOYSTICK_DOWN;
 		}
 	}
 	else pressed_joystick_down = 0;
@@ -50,7 +58,9 @@ void RIT_IRQHandler(void){
 	if(joystick_check_dir(JOYSTICK_LEFT)){
 		pressed_joystick_left++;
 		if(pressed_joystick_left == 1) {
-			joystick_flag |= FLAG_JOYSTICK_LEFT;
+			//joystick_flag |= FLAG_JOYSTICK_LEFT;
+			game.next_dir = LEFT;	
+			//joystick_flag &= ~FLAG_JOYSTICK_LEFT;
 		}
 	}
 	else pressed_joystick_left = 0;
@@ -62,25 +72,20 @@ void RIT_IRQHandler(void){
 	if(joystick_check_dir(JOYSTICK_RIGHT)){
 		pressed_joystick_right++;
 		if(pressed_joystick_right == 1) {
-			joystick_flag |= FLAG_JOYSTICK_RIGHT;
+			//joystick_flag |= FLAG_JOYSTICK_RIGHT;
+			game.next_dir = RIGHT;
+			//joystick_flag &= ~FLAG_JOYSTICK_RIGHT;
 		}
 	}
 	else pressed_joystick_right = 0;
 	
-	// -------------------------------
-	// JOYSTICK SELECT
-	// -------------------------------
-	
-	if(joystick_check_dir(JOYSTICK_PRESS)){
-		pressed_joystick_select++;
-		if(pressed_joystick_select == 1) {
-			joystick_flag |= FLAG_JOYSTICK_SELECT;
-		}
+	if(game.dir == STOP){
+		game.dir = game.next_dir;
+		game.next_dir = STOP;
 	}
-	else pressed_joystick_select = 0;
 	
 	// -------------------------------
-	// BUTTON 0
+	// PAUSE BTN
 	// -------------------------------
 	
 	if(pressed_button_0 != 0){
@@ -88,7 +93,12 @@ void RIT_IRQHandler(void){
 		if(LPC_GPIO2->FIOPIN & (1 << 10)){
 			btn_flag |= FLAG_BUTTON_0;
 			
-			// check here for a longer press
+			if(game.started){
+				static int toggle_pause = 1;
+				pause_handler(&game, toggle_pause);
+				toggle_pause = !toggle_pause;
+			}
+			btn_flag &= ~FLAG_BUTTON_0;
 			
 			pressed_button_0 = 0;
 			NVIC_EnableIRQ(EINT0_IRQn);
@@ -97,7 +107,7 @@ void RIT_IRQHandler(void){
 	}
 	
 	// -------------------------------
-	// BUTTON 1
+	// START/RESTART BTN
 	// -------------------------------
 	
 	if(pressed_button_1 != 0){

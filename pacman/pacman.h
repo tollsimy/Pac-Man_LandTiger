@@ -57,6 +57,7 @@ volatile typedef struct {
 	int8_t victory;
 	uint32_t pp_spawn_counter;
 	char pause;
+	char started;
 } game_t;
 
 volatile typedef enum {
@@ -76,7 +77,7 @@ void render_power_pill(char x, char y);
 void render_player(char x, char y, int angle);
 void render_gate(char x, char y);
 void render_stats(game_t* game);
-void update_stats(game_t* game);
+void update_render_stats(game_t* game);
 void update_time(game_t* game);
 void render_countdown(uint8_t count);
 void clear_countdown();
@@ -89,8 +90,10 @@ void wait_ready(void);
 void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 // play.c
 uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 char update_game_time(game_t* game);
 void spawn_random_pp(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+void pause_handler(game_t* game, int pause_val);
 void win();
 void loose();
 // pacman_IRQ.c

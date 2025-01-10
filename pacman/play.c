@@ -1,17 +1,44 @@
 #include "pacman.h"
 #include <stdlib.h>
 
-extern volatile uint8_t joystick_flag;
 extern volatile uint8_t btn_flag;
 
 static void add_player(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	grid[game->player_y][game->player_x] = PLAYER;
 }
 
+// return 1 if game ended, else 0
+char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
+	static int prev_score;
+	if(grid[game->player_y][game->player_x] == PILL){
+		if(game->pills > 0){
+			game->pills --;
+		}
+		game->score += 10;
+	} else if(grid[game->player_y][game->player_x] == POWER_PILL) {
+		if(game->pills > 0){
+			game->power_pills --;
+		}
+		game->score += 50;
+	}
+	if(prev_score != game->score && game->score % 1000 == 0 && game->score != 0){
+		game->lifes += 1;
+	}
+	// victory, do not advance anymore when pills finished
+	if(game->pills == 0 && game->power_pills == 0){
+		game->victory = 1;
+	}
+	// game over, do not advance anymore when time elapsed
+	if(game->time == 0){
+		game->victory = 0;
+	}
+	prev_score = game->score;
+	update_render_stats(game);
+	return game->victory == -1 ? 0 : 1;
+}
+
 static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
-	char old_joystick_flag = joystick_flag;
-	char old_btn_flag = btn_flag;
-	while(old_joystick_flag == joystick_flag && old_btn_flag == btn_flag){ // break when new input from user
+	while(game->pause != 1){ // break when pause
 		int old_player_x = game->player_x;
 		int old_player_y = game->player_y;
 		
@@ -57,35 +84,19 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		if(grid[new_player_y][new_player_x] != HOR_WALL && grid[new_player_y][new_player_x] != VER_WALL && grid[new_player_y][new_player_x] != GATE) {
 			game->player_x = new_player_x;
 			game->player_y = new_player_y;
-			if(grid[game->player_y][game->player_x] == PILL){
-				if(game->pills > 0){
-					game->pills --;
-				}
-				game->score += 10;
-			} else if(grid[game->player_y][game->player_x] == POWER_PILL) {
-				if(game->pills > 0){
-					game->power_pills --;
-				}
-				game->score += 50;
-			}
+
+			char victory = update_stats(grid, game);
+			
+			// render new pos
 			grid[game->player_y][game->player_x] = PLAYER;
 			grid[old_player_y][old_player_x] = EMPTY;
 			render_new_p_pos(old_player_x, old_player_y, game->player_x, game->player_y, angle);
 			
-			if(game->score % 1000 == 0 && game->score != 0){
-				game->lifes += 1;
-			}
-			update_stats(game);
-			// victory, do not advance anymore when pills finished
-			if(game->pills == 0 && game->power_pills == 0){
-				game->victory = 1;
+			// break after rendering last pos
+			if (victory){
 				break;
 			}
-			// game over, do not advance anymore when time elapsed
-			if(game->time == 0){
-				game->victory = 0;
-				break;
-			}
+			
 			// if user changed dir
 			if(game->next_dir != STOP){
 				// try to change dir if no wall in that dir
@@ -135,37 +146,14 @@ void spawn_random_pp(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	}
 }
 
-static void input_handler(game_t* game){
-	if(joystick_flag & FLAG_JOYSTICK_UP) {
-		joystick_flag &= ~FLAG_JOYSTICK_UP;
-		game->next_dir = UP;
+void pause_handler(game_t* game, int pause){
+	if(pause){
+		game->pause = 1;
+		render_pause(1);
+	} else {
+		game->pause = 0;
+		render_pause(0);
 	}
-	if(joystick_flag & FLAG_JOYSTICK_DOWN) {
-		joystick_flag &= ~FLAG_JOYSTICK_DOWN;
-		game->next_dir = DOWN;
-	}
-	if(joystick_flag & FLAG_JOYSTICK_LEFT) {
-		joystick_flag &= ~FLAG_JOYSTICK_LEFT;
-		game->next_dir = LEFT;
-	}
-	if(joystick_flag & FLAG_JOYSTICK_RIGHT) {
-		joystick_flag &= ~FLAG_JOYSTICK_RIGHT;
-		game->next_dir = RIGHT;
-	}
-	// update dir
-	if(game->dir == STOP){
-		game->dir = game->next_dir;
-		game->next_dir = STOP;
-	}
-}
-
-void pause_handler(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
-	game->pause = 1;
-	render_pause(1);
-	while(!(btn_flag & FLAG_BUTTON_0)){ __ASM("wfi"); };
-	btn_flag &= ~FLAG_BUTTON_0;
-	game->pause = 0;
-	render_pause(0);
 }
 
 uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
@@ -196,23 +184,20 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	render_player(game->player_x, game->player_y, 0);
 	
 	enable_timer(tc.timer_n, PRIO_3);
+	
+	game->started = 1;
 		
-	while(1){
+	while(game->victory == -1){
 		__ASM("wfi");
-		// Repeat until all flags cleared and game not ended
-		while((joystick_flag || game->dir != STOP || btn_flag & FLAG_BUTTON_0) && game->victory == -1){
-			if(joystick_flag){
-				input_handler(game);
-			}
-			if(game->dir != STOP){
-				move(grid, game);
-			}
-			if(btn_flag & FLAG_BUTTON_0){
-				btn_flag &= ~FLAG_BUTTON_0;
-				pause_handler(grid, game);
-			}
+		if(game->dir != STOP){
+			move(grid, game);
 		}
-		if(game->victory != -1){ break; }
+		if(game->pills == 0 && game->power_pills == 0){
+			game->victory = 1;
+		}
+		if(game->time == 0){
+			game->victory = 0;
+		}
 	}
 	disable_timer(1);
 	return game->victory;
@@ -221,6 +206,7 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 void win(){
 	GUI_Text(100, 100, (uint8_t*) "Victory!", Yellow, Black);
 	GUI_Text(80, 120, (uint8_t*) "KEY1 to restart!", Yellow, Black);
+	btn_flag &= ~FLAG_BUTTON_1;
 	while(!(btn_flag & FLAG_BUTTON_1)){ __ASM("wfi"); };
 	btn_flag &= ~FLAG_BUTTON_1;
 }
@@ -228,6 +214,7 @@ void win(){
 void loose(){
 	GUI_Text(100, 100, (uint8_t*) "Game Over!", Yellow, Black);
 	GUI_Text(80, 120, (uint8_t*) "KEY1 to restart!", Yellow, Black);
+	btn_flag &= ~FLAG_BUTTON_1;
 	while(!(btn_flag & FLAG_BUTTON_1)){ __ASM("wfi"); };
 	btn_flag &= ~FLAG_BUTTON_1;
 }
