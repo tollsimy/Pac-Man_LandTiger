@@ -17,10 +17,28 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		
 		int new_player_y = game->player_y;
 		int new_player_x = game->player_x;
-		new_player_y += game->dir == UP ? -1 : 0;
-		new_player_y += game->dir == DOWN ? 1 : 0;
-		new_player_x += game->dir == RIGHT ? 1 : 0;
-		new_player_x += game->dir == LEFT ? -1 : 0;
+		
+		int angle = 0;
+		switch(game->dir){
+			case UP:
+				new_player_y--;
+				angle = 270;
+				break;
+			case DOWN:
+				new_player_y++;
+				angle = 90;
+				break;
+			case RIGHT:
+				new_player_x++;
+				angle = 0;
+				break;
+			case LEFT:
+				new_player_x--;
+				angle = 180;
+				break;
+			case STOP:
+				break;
+		}
 		
 		// Teleport
 		if(new_player_x == GRID_WIDTH){
@@ -52,7 +70,7 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 			}
 			grid[game->player_y][game->player_x] = PLAYER;
 			grid[old_player_y][old_player_x] = EMPTY;
-			render_new_p_pos(old_player_x, old_player_y, game->player_x, game->player_y);
+			render_new_p_pos(old_player_x, old_player_y, game->player_x, game->player_y, angle);
 			
 			if(game->score % 1000 == 0 && game->score != 0){
 				game->lifes += 1;
@@ -175,7 +193,7 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	game->pp_spawn_counter = (rand() % (INITIAL_TIME / (INITIAL_POWER_PILLS - 1)));
 	
 	add_player(grid, game);
-	render_player(game->player_x, game->player_y);
+	render_player(game->player_x, game->player_y, 0);
 	
 	enable_timer(tc.timer_n, PRIO_3);
 		

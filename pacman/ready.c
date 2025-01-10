@@ -24,7 +24,7 @@ void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 					render_power_pill(j,i);
 					break;
 				case PLAYER:
-					render_player(j,i);
+					render_player(j,i, 0);
 					break;
 				case GATE:
 					render_gate(j,i);

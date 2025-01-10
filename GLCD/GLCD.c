@@ -596,16 +596,6 @@ void LCD_DrawLine( uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1 , uint16_t
 	}
 }
 
-void LCD_draw_circle(uint16_t xpos, uint16_t ypos, uint16_t r, uint16_t color){
-	for(int x=-r; x<r; x++){
-		for(int y=-r; y<r; y++){
-			if(x*x+y*y < r*r){
-				LCD_SetPoint(xpos+x,ypos+y,color);
-			}
-		}
-	}
-}
-
 /******************************************************************************
 * Function Name  : PutChar
 * Description    : ��Lcd��������λ����ʾһ���ַ�
