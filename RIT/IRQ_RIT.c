@@ -3,6 +3,7 @@
 #include "../timer/timer.h"
 #include "../joystick/joystick.h"
 #include "../button_EXINT/button.h"
+#include "../adc/adc.h"
 #include "../pacman/pacman.h"
 
 volatile uint32_t pressed_button_0 = 0;
@@ -18,70 +19,73 @@ uint32_t pressed_joystick_select = 0;
 volatile uint8_t joystick_flag = 0;
 volatile uint8_t btn_flag = 0;
 
+extern volatile uint8_t PLAY_SONG;
 extern game_t game;
 extern void pause_handler(game_t* game, int pause_val);
 
 void RIT_IRQHandler(void){	
 	
-	// -------------------------------
-	// JOYSTICK UP
-	// -------------------------------
-	
-	if(joystick_check_dir(JOYSTICK_UP)){
-		pressed_joystick_up++;
-		if(pressed_joystick_up == 1) {
-			//joystick_flag |= FLAG_JOYSTICK_UP;
-			game.next_dir = UP;
-			//joystick_flag &= ~FLAG_JOYSTICK_UP;
+	if(!game.pause){
+		// -------------------------------
+		// JOYSTICK UP
+		// -------------------------------
+		
+		if(joystick_check_dir(JOYSTICK_UP)){
+			pressed_joystick_up++;
+			if(pressed_joystick_up == 1) {
+				//joystick_flag |= FLAG_JOYSTICK_UP;
+				game.next_pdir = UP;
+				//joystick_flag &= ~FLAG_JOYSTICK_UP;
+			}
 		}
-	}
-	else pressed_joystick_up = 0;
-	
-	// -------------------------------
-	// JOYSTICK DOWN
-	// -------------------------------
-	
-	if(joystick_check_dir(JOYSTICK_DOWN)){
-		pressed_joystick_down++;
-		if(pressed_joystick_down == 1) {
-			//joystick_flag |= FLAG_JOYSTICK_DOWN;
-			game.next_dir = DOWN;
-			//joystick_flag &= ~FLAG_JOYSTICK_DOWN;
+		else pressed_joystick_up = 0;
+		
+		// -------------------------------
+		// JOYSTICK DOWN
+		// -------------------------------
+		
+		if(joystick_check_dir(JOYSTICK_DOWN)){
+			pressed_joystick_down++;
+			if(pressed_joystick_down == 1) {
+				//joystick_flag |= FLAG_JOYSTICK_DOWN;
+				game.next_pdir = DOWN;
+				//joystick_flag &= ~FLAG_JOYSTICK_DOWN;
+			}
 		}
-	}
-	else pressed_joystick_down = 0;
-	
-	// -------------------------------
-	// JOYSTICK LEFT
-	// -------------------------------
-	
-	if(joystick_check_dir(JOYSTICK_LEFT)){
-		pressed_joystick_left++;
-		if(pressed_joystick_left == 1) {
-			//joystick_flag |= FLAG_JOYSTICK_LEFT;
-			game.next_dir = LEFT;	
-			//joystick_flag &= ~FLAG_JOYSTICK_LEFT;
+		else pressed_joystick_down = 0;
+		
+		// -------------------------------
+		// JOYSTICK LEFT
+		// -------------------------------
+		
+		if(joystick_check_dir(JOYSTICK_LEFT)){
+			pressed_joystick_left++;
+			if(pressed_joystick_left == 1) {
+				//joystick_flag |= FLAG_JOYSTICK_LEFT;
+				game.next_pdir = LEFT;	
+				//joystick_flag &= ~FLAG_JOYSTICK_LEFT;
+			}
 		}
-	}
-	else pressed_joystick_left = 0;
-	
-	// -------------------------------
-	// JOYSTICK RIGHT
-	// -------------------------------
-	
-	if(joystick_check_dir(JOYSTICK_RIGHT)){
-		pressed_joystick_right++;
-		if(pressed_joystick_right == 1) {
-			//joystick_flag |= FLAG_JOYSTICK_RIGHT;
-			game.next_dir = RIGHT;
-			//joystick_flag &= ~FLAG_JOYSTICK_RIGHT;
+		else pressed_joystick_left = 0;
+		
+		// -------------------------------
+		// JOYSTICK RIGHT
+		// -------------------------------
+		
+		if(joystick_check_dir(JOYSTICK_RIGHT)){
+			pressed_joystick_right++;
+			if(pressed_joystick_right == 1) {
+				//joystick_flag |= FLAG_JOYSTICK_RIGHT;
+				game.next_pdir = RIGHT;
+				//joystick_flag &= ~FLAG_JOYSTICK_RIGHT;
+			}
 		}
-	}
-	else pressed_joystick_right = 0;
-	
-	if(game.dir == STOP){
-		game.dir = game.next_dir;
-		game.next_dir = STOP;
+		else pressed_joystick_right = 0;
+		
+		if(game.pdir == STOP){
+			game.pdir = game.next_pdir;
+			game.next_pdir = STOP;
+		}
 	}
 	
 	// -------------------------------
@@ -136,8 +140,13 @@ void RIT_IRQHandler(void){
 			}
 	}
 	
+	if(PLAY_SONG == 1){
+		play_melody_note();
+	}
+	
 	LPC_RIT->RICTRL |= 0x1;
 }
+
 /******************************************************************************
 **                            End Of File
 ******************************************************************************/

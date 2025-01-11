@@ -3,6 +3,7 @@
 
 #include "../common.h"
 #include "../include.h"
+#include "../CAN/CAN.h"
 
 #define INITIAL_TIME 	60
 #define INITIAL_PILLS 240
@@ -25,6 +26,11 @@
 #define CELL_SIZE_X GRID_RES_X/GRID_WIDTH
 #define CELL_SIZE_Y GRID_RES_Y/GRID_HEIGHT
 
+#define ENEMY_NUM 1
+
+#define INITIAL_ENEMY_X 13
+#define INITIAL_ENEMY_Y 15
+
 volatile typedef enum {
 	EMPTY,
 	PILL,
@@ -32,6 +38,7 @@ volatile typedef enum {
 	HOR_WALL,
 	VER_WALL,
 	PLAYER,
+	ENEMY,
 	GATE,
 } cell_t;
 
@@ -52,8 +59,11 @@ volatile typedef struct {
 	int score;
 	int player_x;
 	int player_y;
-	dir_t dir;
-	dir_t next_dir;
+	int enemy_x[ENEMY_NUM];
+	int enemy_y[ENEMY_NUM];
+	dir_t pdir;
+	dir_t edir[ENEMY_NUM];
+	dir_t next_pdir;
 	int8_t victory;
 	uint32_t pp_spawn_counter;
 	char pause;
@@ -75,12 +85,14 @@ void render_ver_wall(char x, char y);
 void render_pill(char x, char y);
 void render_power_pill(char x, char y);
 void render_player(char x, char y, int angle);
+void render_enemy(char x, char y, int angle);
 void render_gate(char x, char y);
 void render_stats(game_t* game);
-void update_render_stats(game_t* game);
-void update_time(game_t* game);
+void update_stats_CAN(CAN_msg CAN_RxMsg, game_t* game);
+void update_time_CAN(CAN_msg CAN_RxMsg, game_t* game);
 void render_countdown(uint8_t count);
 void clear_countdown();
+void render_new_e_pos(int old_player_x, int old_player_y, int player_x, int player_y, cell_t prev_cell, int angle);
 void render_new_p_pos(int old_player_x, int old_player_y, int player_x, int player_y, int angle);
 void render_pause(char val);
 // reset.c
@@ -98,5 +110,9 @@ void win();
 void loose();
 // pacman_IRQ.c
 void pacman_timer_IRQ();
+// can.c
+void CAN_send_stats(game_t* game);
+// music.c
+void play_melody_note();
 
 #endif

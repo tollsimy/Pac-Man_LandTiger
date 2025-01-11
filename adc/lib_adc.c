@@ -17,6 +17,7 @@ void ADC_init (void) {
   LPC_ADC->ADINTEN     =  (1<< 8);      /* global enable interrupt            */
 
   NVIC_EnableIRQ(ADC_IRQn);             /* enable ADC Interrupt               */
+	NVIC_SetPriority(ADC_IRQn, 1);
 }
 
 void ADC_start_conversion (void) {

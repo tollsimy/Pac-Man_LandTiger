@@ -2,9 +2,17 @@
 #include <stdlib.h>
 
 extern volatile uint8_t btn_flag;
+extern CAN_msg CAN_RxMsg;
+extern volatile unsigned char CAN2_RX;
 
 static void add_player(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	grid[game->player_y][game->player_x] = PLAYER;
+}
+
+static void add_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
+	for(int i=0; i<ENEMY_NUM; i++){
+		grid[game->enemy_y[i]][game->enemy_x[i]] = ENEMY;
+	}
 }
 
 // return 1 if game ended, else 0
@@ -33,7 +41,18 @@ char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		game->victory = 0;
 	}
 	prev_score = game->score;
-	update_render_stats(game);
+	
+#ifndef SIMULATOR
+	// Send Stats via CAN bus
+	CAN_send_stats(game);
+	// TODO: test
+	// Wait until stats recevied
+	while(!CAN2_RX){
+		__ASM("wfi");
+	};
+	CAN2_RX = 0;
+#endif
+	update_stats_CAN(CAN_RxMsg, game);
 	return game->victory == -1 ? 0 : 1;
 }
 
@@ -46,7 +65,7 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		int new_player_x = game->player_x;
 		
 		int angle = 0;
-		switch(game->dir){
+		switch(game->pdir){
 			case UP:
 				new_player_y--;
 				angle = 270;
@@ -98,32 +117,101 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 			}
 			
 			// if user changed dir
-			if(game->next_dir != STOP){
+			if(game->next_pdir != STOP){
 				// try to change dir if no wall in that dir
-				new_player_y += game->next_dir == UP ? -1 : 0;
-				new_player_y += game->next_dir == DOWN ? 1 : 0;
-				new_player_x += game->next_dir == RIGHT ? 1 : 0;
-				new_player_x += game->next_dir == LEFT ? -1 : 0;
+				new_player_y += game->next_pdir == UP ? -1 : 0;
+				new_player_y += game->next_pdir == DOWN ? 1 : 0;
+				new_player_x += game->next_pdir == RIGHT ? 1 : 0;
+				new_player_x += game->next_pdir == LEFT ? -1 : 0;
 				if(grid[new_player_y][new_player_x] != HOR_WALL && grid[new_player_y][new_player_x] != VER_WALL && grid[new_player_y][new_player_x] != GATE) {
-					game->dir = game->next_dir;
-					game->next_dir = STOP;
+					game->pdir = game->next_pdir;
+					game->next_pdir = STOP;
 				}
-			}
+			} 
 		}
 		else {
-			game->dir = STOP;
+			game->pdir = STOP;
 			break;
 		}
 		delay_ms(80, TIMER_0);
 	}
 }
 
+//TODO
+static void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
+	for(int i=0; i<ENEMY_NUM; i++){
+		if(game->edir[i] != STOP){
+			int old_enemy_x = game->enemy_x[i];
+			int old_enemy_y = game->enemy_y[i];
+			
+			int new_enemy_y = old_enemy_y;
+			int new_enemy_x = old_enemy_x;
+			switch(game->edir[i]){
+				case UP:
+					new_enemy_y--;
+					break;
+				case DOWN:
+					new_enemy_y++;
+					break;
+				case LEFT:
+					new_enemy_x--;
+					break;
+				case RIGHT:
+					new_enemy_x++;
+					break;
+				case STOP:
+					return;
+			}
+			
+			if(grid[new_enemy_y][new_enemy_x] == GATE){
+				// Gate can be trepassed only from inside prison
+				if(old_enemy_y > new_enemy_y){
+					game->enemy_x[i] = new_enemy_x;
+					game->enemy_y[i] = new_enemy_y - 1; // Jump gate
+					
+					cell_t prev_cell = grid[game->enemy_y[i]][game->enemy_x[i]];
+					grid[game->enemy_y[i]][game->enemy_x[i]] = ENEMY;
+					grid[old_enemy_y][old_enemy_x] = EMPTY;
+					// TODO: angle
+					render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy_x[i], game->enemy_y[i], prev_cell, 0);
+				}
+				else {
+					game->edir[i] = STOP;
+				}
+			}
+			else if(grid[new_enemy_y][new_enemy_x] != HOR_WALL && grid[new_enemy_y][new_enemy_x] != VER_WALL) {
+				game->enemy_x[i] = new_enemy_x;
+				game->enemy_y[i] = new_enemy_y;
+				
+				cell_t prev_cell = grid[game->enemy_y[i]][game->enemy_x[i]];
+				grid[game->enemy_y[i]][game->enemy_x[i]] = ENEMY;
+				grid[old_enemy_y][old_enemy_x] = prev_cell;
+				// TODO: angle
+				render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy_x[i], game->enemy_y[i], prev_cell, 0);
+			}
+			else {
+				game->edir[i] = STOP;
+			}
+		}
+	}
+}
+
 char update_game_time(game_t* game){
 	if(!game->pause){
+#ifndef SIMULATOR
+		// Send stats via CAN bus
+		CAN_send_stats(game);
+		// TODO: test 
+		//Wait until stats recevied
+		while(!CAN2_RX){
+			__ASM("wfi");
+		};
+		CAN2_RX = 0;
+#endif
 		if(game->time > 0){
 			game->time -= 1;
 		}
-		update_time(game);
+		update_time_CAN(CAN_RxMsg, game);
 	}
 	return game->time;
 }
@@ -167,11 +255,11 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	}
 	clear_countdown();
 	
-	uint32_t game_timer_1s = 1000;
+	uint32_t game_timer = 100;
 	struct timer_configuration tc = {
 		.timer_n = TIMER_1,
 		.prescale = 0,
-		.mr0 = TIM_MS_TO_TICKS_SIMPLE(game_timer_1s),
+		.mr0 = TIM_MS_TO_TICKS_SIMPLE(game_timer),
 		.configuration_mr0 = TIMER_INTERRUPT_MR | TIMER_RESET_MR,
 	};
 	init_timer(&tc);
@@ -181,6 +269,7 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	game->pp_spawn_counter = (rand() % (INITIAL_TIME / (INITIAL_POWER_PILLS - 1)));
 	
 	add_player(grid, game);
+	add_enemies(grid, game);
 	render_player(game->player_x, game->player_y, 0);
 	
 	enable_timer(tc.timer_n, PRIO_3);
@@ -189,7 +278,7 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		
 	while(game->victory == -1){
 		__ASM("wfi");
-		if(game->dir != STOP){
+		if(game->pdir != STOP){
 			move(grid, game);
 		}
 		if(game->pills == 0 && game->power_pills == 0){

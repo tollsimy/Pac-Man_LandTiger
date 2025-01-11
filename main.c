@@ -15,6 +15,8 @@ int main (void) {
 	
 	joystick_init();
 	LCD_Initialization();
+	ADC_init();
+	CAN_Init();
 	
 	BUTTON_init(BUTTON_0, PRIO_3);
 	BUTTON_init(BUTTON_1, PRIO_3);
@@ -27,6 +29,11 @@ int main (void) {
 	
 	LPC_SC->PCON |= 0x1;					// PM0=1
 	LPC_SC->PCON &= 0xFFFFFFFFD;	// PM1=0
+	
+	// Speaker pin settings
+	LPC_PINCON->PINSEL1 |= (1<<21);
+	LPC_PINCON->PINSEL1 &= ~(1<<20);
+	LPC_GPIO0->FIODIR |= (1<<26);
 	
 	pacman();
 }
