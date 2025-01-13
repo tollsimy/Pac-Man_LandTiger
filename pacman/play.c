@@ -198,6 +198,9 @@ static void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 
 char update_game_time(game_t* game){
 	if(!game->pause){
+		if(game->time > 0){
+			game->time -= 1;
+		}
 #ifndef SIMULATOR
 		// Send stats via CAN bus
 		CAN_send_stats(game);
@@ -208,9 +211,6 @@ char update_game_time(game_t* game){
 		};
 		CAN2_RX = 0;
 #endif
-		if(game->time > 0){
-			game->time -= 1;
-		}
 		update_time_CAN(CAN_RxMsg, game);
 	}
 	return game->time;

@@ -56,7 +56,7 @@ volatile typedef struct {
 	char power_pills_spawn;
 	char lifes;
 	char time;
-	int score;
+	uint16_t score;
 	int player_x;
 	int player_y;
 	int enemy_x[ENEMY_NUM];

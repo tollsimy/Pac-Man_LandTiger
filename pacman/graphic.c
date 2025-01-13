@@ -95,16 +95,16 @@ static void rotate_sprite(const uint8_t original[8][8], uint8_t rotated[8][8], i
     for (int col = 0; col < width; col++) {
       if (original[row][col]) {
         switch (angle) {
-          case 90: // 90� clockwise
+          case 90: // 90 clockwise
             rotated[col][height - 1 - row] = 1;
             break;
-          case 180: // 180�
+          case 180: // 180
             rotated[height - 1 - row][width - 1 - col] = 1;
             break;
-          case 270: // 90� counterclockwise
+          case 270: // 90 counterclockwise
             rotated[width - 1 - col][row] = 1;
             break;
-          default: // 0� (no rotation)
+          default: // 0 (no rotation)
             rotated[row][col] = 1;
             break;
         }
@@ -195,7 +195,7 @@ void update_stats_CAN(CAN_msg CAN_RxMsg, game_t* game){
 			render_sprite(10 + (16*i), 305, l_heart_sprite, Red);
 			render_sprite(18 + (16*i), 305, r_heart_sprite, Red);
 		}
-#elif
+#else
 		for(int i=0; i<(CAN_RxMsg.data[1]); i++){
 			render_sprite(10 + (16*i), 305, l_heart_sprite, Red);
 			render_sprite(18 + (16*i), 305, r_heart_sprite, Red);
@@ -208,8 +208,9 @@ void update_stats_CAN(CAN_msg CAN_RxMsg, game_t* game){
 #ifdef SIMULATOR
 		sprintf(str, "%04d", game->score);
 		GUI_Text(167, 5, (uint8_t*)str, White, Black);
-#elif
-		sprintf(str, "%04d", CAN_RxMsg.data[2]);
+#else
+		uint16_t score = CAN_RxMsg.data[2] +  (CAN_RxMsg.data[3] << 8);
+		sprintf(str, "%04d", score);
 		GUI_Text(167, 5, (uint8_t*)str, White, Black);
 #endif
 		prev_score = game->score;
@@ -218,17 +219,17 @@ void update_stats_CAN(CAN_msg CAN_RxMsg, game_t* game){
 
 void update_time_CAN(CAN_msg CAN_RxMsg, game_t* game){
 	char str[10];
-
-#ifdef SIMULATOR
 	uint16_t color = White;
-	sprintf(str, "%02d", game->time);
 	if(game->time < 5){
 		color = Red;
 	}
+	
+#ifdef SIMULATOR
+	sprintf(str, "%02d", game->time);
 	GUI_Text(79, 5, (uint8_t*)str, color, Black);
-#elif
+#else
 	sprintf(str, "%02d", CAN_RxMsg.data[0]);
-	GUI_Text(79, 5, (uint8_t*)str, White, Black);
+	GUI_Text(79, 5, (uint8_t*)str, color, Black);
 #endif
 }
 

@@ -25,7 +25,7 @@ extern void pause_handler(game_t* game, int pause_val);
 
 void RIT_IRQHandler(void){	
 	
-	if(!game.pause){
+	if(game.started && !game.pause){
 		// -------------------------------
 		// JOYSTICK UP
 		// -------------------------------
