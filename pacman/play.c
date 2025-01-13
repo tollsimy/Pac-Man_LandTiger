@@ -28,6 +28,9 @@ char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 			game->power_pills --;
 		}
 		game->score += 50;
+		game->melody.melody = MELODY_P_PILL;
+		game->melody.length = sizeof(MELODY_P_PILL)/sizeof(MELODY_P_PILL[0]);
+		enable_melody();
 	}
 	if(prev_score != game->score && game->score % 1000 == 0 && game->score != 0){
 		game->lifes += 1;
@@ -45,7 +48,6 @@ char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 #ifndef SIMULATOR
 	// Send Stats via CAN bus
 	CAN_send_stats(game);
-	// TODO: test
 	// Wait until stats recevied
 	while(!CAN2_RX){
 		__ASM("wfi");
@@ -204,7 +206,6 @@ char update_game_time(game_t* game){
 #ifndef SIMULATOR
 		// Send stats via CAN bus
 		CAN_send_stats(game);
-		// TODO: test 
 		//Wait until stats recevied
 		while(!CAN2_RX){
 			__ASM("wfi");

@@ -4,6 +4,7 @@
 #include "../common.h"
 #include "../include.h"
 #include "../CAN/CAN.h"
+#include "../music/music.h"
 
 #define INITIAL_TIME 	60
 #define INITIAL_PILLS 240
@@ -30,6 +31,11 @@
 
 #define INITIAL_ENEMY_X 13
 #define INITIAL_ENEMY_Y 15
+
+typedef struct {
+	NOTE* melody;
+	int length;
+} Melody;
 
 volatile typedef enum {
 	EMPTY,
@@ -68,6 +74,7 @@ volatile typedef struct {
 	uint32_t pp_spawn_counter;
 	char pause;
 	char started;
+	Melody melody;
 } game_t;
 
 volatile typedef enum {
@@ -77,6 +84,50 @@ volatile typedef enum {
 	STATE_WIN,
 	STATE_LOOSE
 } state_t;
+
+// music
+
+static NOTE MELODY_PACMAN[] = {
+	{NOTE_B4, time_16th},
+	{NOTE_B5, time_16th},
+	{NOTE_FS5, time_16th},
+	{NOTE_DS5, time_16th},
+	{NOTE_B5, time_32nd},
+	{NOTE_FS5, time_16th_dotted},
+	{NOTE_DS5, time_8th},
+	{NOTE_C5, time_16th},
+	{NOTE_C6, time_16th},
+	{NOTE_G6, time_16th},
+	{NOTE_E6, time_16th},
+	{NOTE_C6, time_32nd},
+	{NOTE_G6, time_16th_dotted},
+	{NOTE_E6, time_8th},
+	
+	{NOTE_B4, time_16th},
+	{NOTE_B5, time_16th},
+	{NOTE_FS5, time_16th},
+	{NOTE_DS5, time_16th},
+	{NOTE_B5, time_32nd},
+	{NOTE_FS5, time_16th_dotted},
+	{NOTE_DS5, time_8th},
+	{NOTE_DS5, time_32nd},
+	{NOTE_E5, time_32nd},
+	{NOTE_F5, time_32nd},
+	{NOTE_F5, time_32nd},
+	{NOTE_FS5, time_32nd},
+	{NOTE_G5, time_32nd},
+	{NOTE_G5, time_32nd},
+	{NOTE_GS5, time_32nd},
+	{NOTE_A5, time_16th},
+	{NOTE_B5, time_8th},
+};
+
+static NOTE MELODY_P_PILL[] = {
+	{NOTE_A5, time_16th},
+	{NOTE_F5, time_16th},
+};
+
+//
 
 void pacman();
 // graphic.c
@@ -97,7 +148,7 @@ void render_new_p_pos(int old_player_x, int old_player_y, int player_x, int play
 void render_pause(char val);
 // reset.c
 void init_game(game_t* game);
-void wait_ready(void);
+void wait_ready(game_t* game);
 // ready.c
 void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 // play.c
@@ -112,7 +163,8 @@ void loose();
 void pacman_timer_IRQ();
 // can.c
 void CAN_send_stats(game_t* game);
-// music.c
-void play_melody_note();
+// pacman_music.c
+void play_melody_note(NOTE melody[], int lenght);
+void enable_melody();
 
 #endif

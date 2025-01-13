@@ -1,21 +1,23 @@
-#include "../common.h"
-#include "../music/music.h"
-#include "../RIT/RIT.h"
+#include "pacman.h"
 
-//TODO
-NOTE pacman_song[] = {
-	{g4, time_croma},
-};
+static int currentNote = -1;
 
-int currentNote = 0;
-
-void play_melody_note(){
-	if(!isNotePlaying())
-	{
-		playNote(pacman_song[currentNote++]);
+void play_melody_note(NOTE melody[], int lenght){
+	
+	if(currentNote >= 0){
+		if(!isNotePlaying())
+		{
+			playNote(melody[currentNote++]);
+		}
+		// disable melody when finished
+		if(currentNote == lenght)
+		{
+			currentNote = -1;
+		}
 	}
-	if(currentNote == (sizeof(pacman_song) / sizeof(pacman_song[0])))
-	{
-		currentNote = 0;
-	}
+}
+
+// enable melody (again)
+void enable_melody(){
+	currentNote = 0;
 }

@@ -19,7 +19,6 @@ uint32_t pressed_joystick_select = 0;
 volatile uint8_t joystick_flag = 0;
 volatile uint8_t btn_flag = 0;
 
-extern volatile uint8_t PLAY_SONG;
 extern game_t game;
 extern void pause_handler(game_t* game, int pause_val);
 
@@ -140,9 +139,7 @@ void RIT_IRQHandler(void){
 			}
 	}
 	
-	if(PLAY_SONG == 1){
-		play_melody_note();
-	}
+	play_melody_note(game.melody.melody, game.melody.length);
 	
 	LPC_RIT->RICTRL |= 0x1;
 }

@@ -4,6 +4,8 @@
 
 extern void pacman_timer_IRQ();
 
+extern volatile double VOLUME;
+
 void TIMER0_IRQHandler (void){
 	uint8_t irq_source = LPC_TIM0->IR;
 	
@@ -21,6 +23,24 @@ void TIMER0_IRQHandler (void){
 	return;
 }
 
+void TIMER1_IRQHandler (void){
+	uint8_t irq_source = LPC_TIM1->IR;
+	
+	if(irq_source & IR_MR0) { // mr0
+		// Used only in game play state
+		pacman_timer_IRQ();
+	} else if(irq_source & IR_MR1) { // mr1
+		
+	} else if(irq_source & IR_MR2) { // mr2
+		
+	} else if(irq_source & IR_MR3) { // mr3
+		
+	}
+	
+	LPC_TIM1->IR = irq_source;
+	return;
+}
+
 uint16_t SinTable[45] =
 {
     410, 467, 523, 576, 627, 673, 714, 749, 778,
@@ -32,37 +52,16 @@ uint16_t SinTable[45] =
 
 int sineticks=0;
 
-void TIMER1_IRQHandler (void){
-	uint8_t irq_source = LPC_TIM1->IR;
-	
-	if(irq_source & IR_MR0) { // mr0
-		// Used only in game play state
-		pacman_timer_IRQ();
-	} else if(irq_source & IR_MR1) { // mr1
-		// Music, used only in game reset state
-		/* DAC management */
-		LPC_DAC->DACR = SinTable[sineticks] <<6;
-		sineticks++;
-		if(sineticks==45) sineticks=0;
-	} else if(irq_source & IR_MR2) { // mr2
-		
-	} else if(irq_source & IR_MR3) { // mr3
-		
-	}
-	
-	LPC_TIM1->IR = irq_source;
-	return;
-}
-
-
 void TIMER2_IRQHandler(void){
 	uint8_t irq_source = LPC_TIM2->IR;
 	
 	if(irq_source & IR_MR0) { // mr0
 
 	} else if(irq_source & IR_MR1) { // mr1
-		// Music, used only in game reset state
-		disable_timer(1);
+		/* DAC management */
+		LPC_DAC->DACR = ((int)(SinTable[sineticks] * VOLUME)) << 6;
+		sineticks++;
+		if(sineticks==45) sineticks=0;
 	} else if(irq_source & IR_MR2) { // mr2
 		
 	} else if(irq_source & IR_MR3) { // mr3
@@ -79,7 +78,7 @@ void TIMER3_IRQHandler (void){
 	if(irq_source & IR_MR0) { // mr0
 		
 	} else if(irq_source & IR_MR1) { // mr1
-		
+		disable_timer(2);
 	} else if(irq_source & IR_MR2) { // mr2
 		
 	} else if(irq_source & IR_MR3) { // mr3

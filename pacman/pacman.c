@@ -48,7 +48,7 @@ void pacman(void){
 				// copy const matrix to play again from initial state
 				memcpy((void*)grid, (void*)initial_grid, GRID_HEIGHT*GRID_WIDTH*sizeof(cell_t));
 				init_game(&game);
-				wait_ready();
+				wait_ready(&game);
 				state = STATE_READY;
 				break;
 			case STATE_READY:
