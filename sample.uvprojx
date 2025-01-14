@@ -615,6 +615,11 @@
               <FileType>1</FileType>
               <FilePath>.\pacman\pacman_music.c</FilePath>
             </File>
+            <File>
+              <FileName>enemy.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\enemy.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1265,6 +1270,11 @@
               <FileName>pacman_music.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\pacman\pacman_music.c</FilePath>
+            </File>
+            <File>
+              <FileName>enemy.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\pacman\enemy.c</FilePath>
             </File>
           </Files>
         </Group>

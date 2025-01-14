@@ -2,7 +2,12 @@
 
 // initial states
 state_t state = STATE_RESET;
-game_t game;
+Player player_instance = {0};
+Enemy enemy_instance = {0};
+game_t game = {
+    .player = &player_instance,
+    .enemy = &enemy_instance,
+};
 
 const cell_t initial_grid[GRID_HEIGHT][GRID_WIDTH] = {
 		{VER_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL, HOR_WALL}, 
@@ -63,7 +68,7 @@ void pacman(void){
 				state = STATE_RESET;
 				break;
 			case STATE_LOOSE:
-				loose();
+				lose();
 				state = STATE_RESET;
 				break;
 		}

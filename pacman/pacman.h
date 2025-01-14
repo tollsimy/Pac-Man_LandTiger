@@ -32,6 +32,8 @@
 #define INITIAL_ENEMY_X 13
 #define INITIAL_ENEMY_Y 15
 
+#define INITIAL_ENEMY_DELAY 4 // >= 4
+
 typedef struct {
 	NOTE* melody;
 	int length;
@@ -57,24 +59,33 @@ volatile typedef enum {
 } dir_t;
 
 volatile typedef struct {
+	int player_x;
+	int player_y;
+	dir_t pdir;
+	dir_t next_pdir;
+} Player;
+
+volatile typedef struct {
+	int enemy_x[ENEMY_NUM];
+	int enemy_y[ENEMY_NUM];
+	dir_t edir[ENEMY_NUM];
+	uint8_t enemy_delay;
+	uint8_t enemy_fright;
+} Enemy;
+
+volatile typedef struct {
 	char pills;
 	char power_pills;
 	char power_pills_spawn;
+	uint32_t pp_spawn_counter;
 	char lifes;
 	char time;
 	uint16_t score;
-	int player_x;
-	int player_y;
-	int enemy_x[ENEMY_NUM];
-	int enemy_y[ENEMY_NUM];
-	dir_t pdir;
-	dir_t edir[ENEMY_NUM];
-	uint8_t enemy_fright;
-	dir_t next_pdir;
 	int8_t victory;
-	uint32_t pp_spawn_counter;
 	char pause;
 	char started;
+	Player* player;
+	Enemy* enemy;
 	Melody melody;
 } game_t;
 
@@ -156,20 +167,23 @@ void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
-uint8_t check_collision(game_t* game);
+uint8_t check_collision(game_t* game, uint8_t enemy_num);
 void respawn_pacman(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 char update_game_time(game_t* game);
 void spawn_random_pp(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
-void pause_handler(game_t* game, int pause_val);
+void pause_handler(game_t* game);
 void win();
-void loose();
+void lose();
 // pacman_IRQ.c
 void pacman_timer_IRQ();
+void pacman_fright_IRQ();
 // can.c
 void CAN_send_stats(game_t* game);
 // pacman_music.c
 void play_melody_note(NOTE melody[], int lenght);
 void enable_melody();
+// enemy.c
+void calc_enemy_dir(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 
 #endif

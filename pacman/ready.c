@@ -30,7 +30,7 @@ void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 					render_gate(j,i);
 					break;
 				case ENEMY:
-					render_enemy(i,j, 0, game->enemy_fright);
+					render_enemy(i,j, 0, game->enemy->enemy_fright);
 					break;
 				case EMPTY:
 					break;

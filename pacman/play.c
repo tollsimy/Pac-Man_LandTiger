@@ -6,24 +6,36 @@ extern CAN_msg CAN_RxMsg;
 extern volatile unsigned char CAN2_RX;
 
 static void add_player(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
-	grid[game->player_y][game->player_x] = PLAYER;
+	grid[game->player->player_y][game->player->player_x] = PLAYER;
 }
 
 static void add_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	for(int i=0; i<ENEMY_NUM; i++){
-		grid[game->enemy_y[i]][game->enemy_x[i]] = ENEMY;
+		grid[game->enemy->enemy_y[i]][game->enemy->enemy_x[i]] = ENEMY;
 	}
+}
+
+static void start_fright_timer(){
+	uint32_t timer = 10000;
+	struct timer_configuration tc = {
+		.timer_n = TIMER_0,
+		.prescale = 0,
+		.mr1 = TIM_MS_TO_TICKS_SIMPLE(timer),
+		.configuration_mr1 = TIMER_INTERRUPT_MR | TIMER_RESET_MR | TIMER_STOP_MR,
+	};
+	init_timer(&tc);
+	enable_timer(0, PRIO_2);
 }
 
 // return 1 if game ended, else 0
 char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	static int prev_score;
-	if(grid[game->player_y][game->player_x] == PILL){
+	if(grid[game->player->player_y][game->player->player_x] == PILL){
 		if(game->pills > 0){
 			game->pills --;
 		}
 		game->score += 10;
-	} else if(grid[game->player_y][game->player_x] == POWER_PILL) {
+	} else if(grid[game->player->player_y][game->player->player_x] == POWER_PILL) {
 		if(game->pills > 0){
 			game->power_pills --;
 		}
@@ -31,7 +43,8 @@ char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		game->melody.melody = MELODY_P_PILL;
 		game->melody.length = sizeof(MELODY_P_PILL)/sizeof(MELODY_P_PILL[0]);
 		enable_melody();
-		game->enemy_fright = 1;
+		game->enemy->enemy_fright = 1;
+		start_fright_timer();
 	}
 	if(prev_score != game->score && game->score % 1000 == 0 && game->score != 0){
 		game->lifes += 1;
@@ -61,14 +74,14 @@ char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 
 void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	if(game->pause != 1){ // break when pause
-		int old_player_x = game->player_x;
-		int old_player_y = game->player_y;
+		int old_player_x = game->player->player_x;
+		int old_player_y = game->player->player_y;
 		
-		int new_player_y = game->player_y;
-		int new_player_x = game->player_x;
+		int new_player_y = game->player->player_y;
+		int new_player_x = game->player->player_x;
 		
 		int angle = 0;
-		switch(game->pdir){
+		switch(game->player->pdir){
 			case UP:
 				new_player_y--;
 				angle = 270;
@@ -109,15 +122,15 @@ void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		}
 		
 		if(grid[new_player_y][new_player_x] != HOR_WALL && grid[new_player_y][new_player_x] != VER_WALL && grid[new_player_y][new_player_x] != GATE) {
-			game->player_x = new_player_x;
-			game->player_y = new_player_y;
+			game->player->player_x = new_player_x;
+			game->player->player_y = new_player_y;
 
 			char victory = update_stats(grid, game);
 			
 			// render new pos
-			grid[game->player_y][game->player_x] = PLAYER;
+			grid[game->player->player_y][game->player->player_x] = PLAYER;
 			grid[old_player_y][old_player_x] = EMPTY;
-			render_new_p_pos(old_player_x, old_player_y, game->player_x, game->player_y, angle);
+			render_new_p_pos(old_player_x, old_player_y, game->player->player_x, game->player->player_y, angle);
 			
 			// break after rendering last pos
 			if (victory){
@@ -125,20 +138,20 @@ void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 			}
 			
 			// if user changed dir
-			if(game->next_pdir != STOP){
+			if(game->player->next_pdir != STOP){
 				// try to change dir if no wall in that dir
-				new_player_y += game->next_pdir == UP ? -1 : 0;
-				new_player_y += game->next_pdir == DOWN ? 1 : 0;
-				new_player_x += game->next_pdir == RIGHT ? 1 : 0;
-				new_player_x += game->next_pdir == LEFT ? -1 : 0;
+				new_player_y += game->player->next_pdir == UP ? -1 : 0;
+				new_player_y += game->player->next_pdir == DOWN ? 1 : 0;
+				new_player_x += game->player->next_pdir == RIGHT ? 1 : 0;
+				new_player_x += game->player->next_pdir == LEFT ? -1 : 0;
 				if(grid[new_player_y][new_player_x] != HOR_WALL && grid[new_player_y][new_player_x] != VER_WALL && grid[new_player_y][new_player_x] != GATE) {
-					game->pdir = game->next_pdir;
-					game->next_pdir = STOP;
+					game->player->pdir = game->player->next_pdir;
+					game->player->next_pdir = STOP;
 				}
 			} 
 		}
 		else {
-			game->pdir = STOP;
+			game->player->pdir = STOP;
 			return;
 		}
 	}
@@ -148,13 +161,13 @@ void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	for(int i=0; i<ENEMY_NUM; i++){
 		if(!game->pause){
 			// TODO: bring check out
-			if(game->edir[i] != STOP){
-				int old_enemy_x = game->enemy_x[i];
-				int old_enemy_y = game->enemy_y[i];
+			if(game->enemy->edir[i] != STOP){
+				int old_enemy_x = game->enemy->enemy_x[i];
+				int old_enemy_y = game->enemy->enemy_y[i];
 				
 				int new_enemy_y = old_enemy_y;
 				int new_enemy_x = old_enemy_x;
-				switch(game->edir[i]){
+				switch(game->enemy->edir[i]){
 					case UP:
 						new_enemy_y--;
 						break;
@@ -174,51 +187,49 @@ void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 				if(grid[new_enemy_y][new_enemy_x] == GATE){
 					// Gate can be trepassed only from inside prison
 					if(old_enemy_y > new_enemy_y){
-						game->enemy_x[i] = new_enemy_x;
-						game->enemy_y[i] = new_enemy_y - 1; // Jump gate
+						game->enemy->enemy_x[i] = new_enemy_x;
+						game->enemy->enemy_y[i] = new_enemy_y - 1; // Jump gate
 						
-						cell_t prev_cell = grid[game->enemy_y[i]][game->enemy_x[i]];
-						grid[game->enemy_y[i]][game->enemy_x[i]] = ENEMY;
+						cell_t prev_cell = grid[game->enemy->enemy_y[i]][game->enemy->enemy_x[i]];
+						grid[game->enemy->enemy_y[i]][game->enemy->enemy_x[i]] = ENEMY;
 						grid[old_enemy_y][old_enemy_x] = EMPTY;
 						// TODO: angle
-						render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy_x[i], game->enemy_y[i], prev_cell, 0, game->enemy_fright);
+						render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy->enemy_x[i], game->enemy->enemy_y[i], prev_cell, 0, game->enemy->enemy_fright);
 					}
 					else {
-						game->edir[i] = STOP;
+						game->enemy->edir[i] = STOP;
 					}
 				}
 				else if(grid[new_enemy_y][new_enemy_x] != HOR_WALL && grid[new_enemy_y][new_enemy_x] != VER_WALL) {
-					game->enemy_x[i] = new_enemy_x;
-					game->enemy_y[i] = new_enemy_y;
+					game->enemy->enemy_x[i] = new_enemy_x;
+					game->enemy->enemy_y[i] = new_enemy_y;
 					
-					cell_t prev_cell = grid[game->enemy_y[i]][game->enemy_x[i]];
-					grid[game->enemy_y[i]][game->enemy_x[i]] = ENEMY;
+					cell_t prev_cell = grid[game->enemy->enemy_y[i]][game->enemy->enemy_x[i]];
+					grid[game->enemy->enemy_y[i]][game->enemy->enemy_x[i]] = ENEMY;
 					grid[old_enemy_y][old_enemy_x] = prev_cell;
 					// TODO: angle
-					render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy_x[i], game->enemy_y[i], prev_cell, 0, game->enemy_fright);
+					render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy->enemy_x[i], game->enemy->enemy_y[i], prev_cell, 0, game->enemy->enemy_fright);
 				}
-				game->edir[i] = STOP;
+				game->enemy->edir[i] = STOP;
 			}
 		}
 	}
 }
 
-uint8_t check_collision(game_t* game){
+uint8_t check_collision(game_t* game, uint8_t enemy_num){
 	uint8_t collision = 0;
-	for(int i=0; i<ENEMY_NUM; i++){
-		if(game->player_x == game->enemy_x[i] && game->player_y == game->enemy_y[i]){
-			collision++;
-		}
+	if(game->player->player_x == game->enemy->enemy_x[enemy_num] && game->player->player_y == game->enemy->enemy_y[enemy_num]){
+		collision++;
 	}
 	return collision;
 }
 
 void respawn_pacman(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
-	grid[game->player_y][game->player_x] = EMPTY;
-	game->player_x = PLAYER_INITIAL_POS_X;
-	game->player_y = PLAYER_INITIAL_POS_Y;
-	grid[game->player_y][game->player_x] = PLAYER;
-	render_player(game->player_x, game->player_y, 0);
+	grid[game->player->player_y][game->player->player_x] = EMPTY;
+	game->player->player_x = PLAYER_INITIAL_POS_X;
+	game->player->player_y = PLAYER_INITIAL_POS_Y;
+	grid[game->player->player_y][game->player->player_x] = PLAYER;
+	render_player(game->player->player_x, game->player->player_y, 0);
 }
 
 char update_game_time(game_t* game){
@@ -258,13 +269,11 @@ void spawn_random_pp(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	}
 }
 
-void pause_handler(game_t* game, int pause){
-	if(pause){
-		game->pause = 1;
-		render_pause(1);
+void pause_handler(game_t* game){
+	if(game->pause){
+		render_pause(game->pause);
 	} else {
-		game->pause = 0;
-		render_pause(0);
+		render_pause(game->pause);
 	}
 }
 
@@ -294,9 +303,9 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	
 	add_player(grid, game);
 	add_enemies(grid, game);
-	render_player(game->player_x, game->player_y, 0);
+	render_player(game->player->player_x, game->player->player_y, 0);
 	for(int i=0; i<ENEMY_NUM; i++){
-		render_enemy(game->enemy_x[i], game->enemy_y[i], 0, game->enemy_fright);
+		render_enemy(game->enemy->enemy_x[i], game->enemy->enemy_y[i], 0, game->enemy->enemy_fright);
 	}
 	
 	enable_timer(tc.timer_n, PRIO_3);
@@ -325,7 +334,7 @@ void win(){
 	btn_flag &= ~FLAG_BUTTON_1;
 }
 
-void loose(){
+void lose(){
 	GUI_Text(100, 100, (uint8_t*) "Game Over!", Yellow, Black);
 	GUI_Text(80, 120, (uint8_t*) "KEY1 to restart!", Yellow, Black);
 	btn_flag &= ~FLAG_BUTTON_1;

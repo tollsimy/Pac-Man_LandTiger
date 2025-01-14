@@ -20,7 +20,7 @@ volatile uint8_t joystick_flag = 0;
 volatile uint8_t btn_flag = 0;
 
 extern game_t game;
-extern void pause_handler(game_t* game, int pause_val);
+extern void pause_handler(game_t* game);
 
 void RIT_IRQHandler(void){	
 	
@@ -33,7 +33,7 @@ void RIT_IRQHandler(void){
 			pressed_joystick_up++;
 			if(pressed_joystick_up == 1) {
 				//joystick_flag |= FLAG_JOYSTICK_UP;
-				game.next_pdir = UP;
+				game.player->next_pdir = UP;
 				//joystick_flag &= ~FLAG_JOYSTICK_UP;
 			}
 		}
@@ -47,7 +47,7 @@ void RIT_IRQHandler(void){
 			pressed_joystick_down++;
 			if(pressed_joystick_down == 1) {
 				//joystick_flag |= FLAG_JOYSTICK_DOWN;
-				game.next_pdir = DOWN;
+				game.player->next_pdir = DOWN;
 				//joystick_flag &= ~FLAG_JOYSTICK_DOWN;
 			}
 		}
@@ -61,7 +61,7 @@ void RIT_IRQHandler(void){
 			pressed_joystick_left++;
 			if(pressed_joystick_left == 1) {
 				//joystick_flag |= FLAG_JOYSTICK_LEFT;
-				game.next_pdir = LEFT;	
+				game.player->next_pdir = LEFT;	
 				//joystick_flag &= ~FLAG_JOYSTICK_LEFT;
 			}
 		}
@@ -75,15 +75,15 @@ void RIT_IRQHandler(void){
 			pressed_joystick_right++;
 			if(pressed_joystick_right == 1) {
 				//joystick_flag |= FLAG_JOYSTICK_RIGHT;
-				game.next_pdir = RIGHT;
+				game.player->next_pdir = RIGHT;
 				//joystick_flag &= ~FLAG_JOYSTICK_RIGHT;
 			}
 		}
 		else pressed_joystick_right = 0;
 		
-		if(game.pdir == STOP){
-			game.pdir = game.next_pdir;
-			game.next_pdir = STOP;
+		if(game.player->pdir == STOP){
+			game.player->pdir = game.player->next_pdir;
+			game.player->next_pdir = STOP;
 		}
 	}
 	
@@ -97,9 +97,8 @@ void RIT_IRQHandler(void){
 			btn_flag |= FLAG_BUTTON_0;
 			
 			if(game.started){
-				static int toggle_pause = 1;
-				pause_handler(&game, toggle_pause);
-				toggle_pause = !toggle_pause;
+				game.pause = !game.pause;
+				pause_handler(&game);
 			}
 			btn_flag &= ~FLAG_BUTTON_0;
 			

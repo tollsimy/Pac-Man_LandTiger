@@ -9,16 +9,17 @@ void init_game(game_t* game){
 	game->power_pills_spawn = INITIAL_POWER_PILLS;
 	game->score = INITIAL_SCORE;
 	game->time = INITIAL_TIME;
-	game->player_x = PLAYER_INITIAL_POS_X;
-	game->player_y = PLAYER_INITIAL_POS_Y;
+	game->player->player_x = PLAYER_INITIAL_POS_X;
+	game->player->player_y = PLAYER_INITIAL_POS_Y;
 	for(int i=0; i<ENEMY_NUM; i++){
-		game->enemy_x[i]= INITIAL_ENEMY_X;
-		game->enemy_y[i]= INITIAL_ENEMY_Y;
-		game->edir[i] = STOP;
+		game->enemy->enemy_x[i]= INITIAL_ENEMY_X;
+		game->enemy->enemy_y[i]= INITIAL_ENEMY_Y;
+		game->enemy->edir[i] = STOP;
 	}
-	game->enemy_fright = 0;
-	game->pdir = STOP;
-	game->next_pdir = STOP;
+	game->enemy->enemy_fright = 0;
+	game->enemy->enemy_delay = INITIAL_ENEMY_DELAY;
+	game->player->pdir = STOP;
+	game->player->next_pdir = STOP;
 	game->victory = -1;
 	game->pp_spawn_counter = 0;
 	game->pause = 0;

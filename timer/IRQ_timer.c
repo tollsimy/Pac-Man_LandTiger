@@ -3,6 +3,7 @@
 #include "../pacman/pacman.h"
 
 extern void pacman_timer_IRQ();
+extern void pacman_fright_IRQ();
 
 extern volatile double VOLUME;
 
@@ -12,7 +13,7 @@ void TIMER0_IRQHandler (void){
 	if(irq_source & IR_MR0) { // mr0
 		
 	} else if(irq_source & IR_MR1) { // mr1
-		
+		pacman_fright_IRQ();
 	} else if(irq_source & IR_MR2) { // mr2
 		
 	} else if(irq_source & IR_MR3) { // mr3
