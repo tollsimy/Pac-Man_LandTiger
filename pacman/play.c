@@ -31,6 +31,7 @@ char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		game->melody.melody = MELODY_P_PILL;
 		game->melody.length = sizeof(MELODY_P_PILL)/sizeof(MELODY_P_PILL[0]);
 		enable_melody();
+		game->enemy_fright = 1;
 	}
 	if(prev_score != game->score && game->score % 1000 == 0 && game->score != 0){
 		game->lifes += 1;
@@ -58,8 +59,8 @@ char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	return game->victory == -1 ? 0 : 1;
 }
 
-static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
-	while(game->pause != 1){ // break when pause
+void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
+	if(game->pause != 1){ // break when pause
 		int old_player_x = game->player_x;
 		int old_player_y = game->player_y;
 		
@@ -86,6 +87,11 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 				break;
 			case STOP:
 				break;
+		}
+		
+		// break if not moving
+		if(new_player_x == old_player_x && new_player_y == old_player_y){
+			return;
 		}
 		
 		// Teleport
@@ -115,7 +121,7 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 			
 			// break after rendering last pos
 			if (victory){
-				break;
+				return;
 			}
 			
 			// if user changed dir
@@ -133,69 +139,86 @@ static void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		}
 		else {
 			game->pdir = STOP;
-			break;
+			return;
 		}
-		delay_ms(80, TIMER_0);
 	}
 }
 
-//TODO
-static void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
+void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	for(int i=0; i<ENEMY_NUM; i++){
-		if(game->edir[i] != STOP){
-			int old_enemy_x = game->enemy_x[i];
-			int old_enemy_y = game->enemy_y[i];
-			
-			int new_enemy_y = old_enemy_y;
-			int new_enemy_x = old_enemy_x;
-			switch(game->edir[i]){
-				case UP:
-					new_enemy_y--;
-					break;
-				case DOWN:
-					new_enemy_y++;
-					break;
-				case LEFT:
-					new_enemy_x--;
-					break;
-				case RIGHT:
-					new_enemy_x++;
-					break;
-				case STOP:
-					return;
-			}
-			
-			if(grid[new_enemy_y][new_enemy_x] == GATE){
-				// Gate can be trepassed only from inside prison
-				if(old_enemy_y > new_enemy_y){
+		if(!game->pause){
+			// TODO: bring check out
+			if(game->edir[i] != STOP){
+				int old_enemy_x = game->enemy_x[i];
+				int old_enemy_y = game->enemy_y[i];
+				
+				int new_enemy_y = old_enemy_y;
+				int new_enemy_x = old_enemy_x;
+				switch(game->edir[i]){
+					case UP:
+						new_enemy_y--;
+						break;
+					case DOWN:
+						new_enemy_y++;
+						break;
+					case LEFT:
+						new_enemy_x--;
+						break;
+					case RIGHT:
+						new_enemy_x++;
+						break;
+					case STOP:
+						return;
+				}
+				
+				if(grid[new_enemy_y][new_enemy_x] == GATE){
+					// Gate can be trepassed only from inside prison
+					if(old_enemy_y > new_enemy_y){
+						game->enemy_x[i] = new_enemy_x;
+						game->enemy_y[i] = new_enemy_y - 1; // Jump gate
+						
+						cell_t prev_cell = grid[game->enemy_y[i]][game->enemy_x[i]];
+						grid[game->enemy_y[i]][game->enemy_x[i]] = ENEMY;
+						grid[old_enemy_y][old_enemy_x] = EMPTY;
+						// TODO: angle
+						render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy_x[i], game->enemy_y[i], prev_cell, 0, game->enemy_fright);
+					}
+					else {
+						game->edir[i] = STOP;
+					}
+				}
+				else if(grid[new_enemy_y][new_enemy_x] != HOR_WALL && grid[new_enemy_y][new_enemy_x] != VER_WALL) {
 					game->enemy_x[i] = new_enemy_x;
-					game->enemy_y[i] = new_enemy_y - 1; // Jump gate
+					game->enemy_y[i] = new_enemy_y;
 					
 					cell_t prev_cell = grid[game->enemy_y[i]][game->enemy_x[i]];
 					grid[game->enemy_y[i]][game->enemy_x[i]] = ENEMY;
-					grid[old_enemy_y][old_enemy_x] = EMPTY;
+					grid[old_enemy_y][old_enemy_x] = prev_cell;
 					// TODO: angle
-					render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy_x[i], game->enemy_y[i], prev_cell, 0);
+					render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy_x[i], game->enemy_y[i], prev_cell, 0, game->enemy_fright);
 				}
-				else {
-					game->edir[i] = STOP;
-				}
-			}
-			else if(grid[new_enemy_y][new_enemy_x] != HOR_WALL && grid[new_enemy_y][new_enemy_x] != VER_WALL) {
-				game->enemy_x[i] = new_enemy_x;
-				game->enemy_y[i] = new_enemy_y;
-				
-				cell_t prev_cell = grid[game->enemy_y[i]][game->enemy_x[i]];
-				grid[game->enemy_y[i]][game->enemy_x[i]] = ENEMY;
-				grid[old_enemy_y][old_enemy_x] = prev_cell;
-				// TODO: angle
-				render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy_x[i], game->enemy_y[i], prev_cell, 0);
-			}
-			else {
 				game->edir[i] = STOP;
 			}
 		}
 	}
+}
+
+uint8_t check_collision(game_t* game){
+	uint8_t collision = 0;
+	for(int i=0; i<ENEMY_NUM; i++){
+		if(game->player_x == game->enemy_x[i] && game->player_y == game->enemy_y[i]){
+			collision++;
+		}
+	}
+	return collision;
+}
+
+void respawn_pacman(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
+	grid[game->player_y][game->player_x] = EMPTY;
+	game->player_x = PLAYER_INITIAL_POS_X;
+	game->player_y = PLAYER_INITIAL_POS_Y;
+	grid[game->player_y][game->player_x] = PLAYER;
+	render_player(game->player_x, game->player_y, 0);
 }
 
 char update_game_time(game_t* game){
@@ -272,16 +295,17 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	add_player(grid, game);
 	add_enemies(grid, game);
 	render_player(game->player_x, game->player_y, 0);
+	for(int i=0; i<ENEMY_NUM; i++){
+		render_enemy(game->enemy_x[i], game->enemy_y[i], 0, game->enemy_fright);
+	}
 	
 	enable_timer(tc.timer_n, PRIO_3);
 	
 	game->started = 1;
-		
+	
+	//TODO: move to IRQ
 	while(game->victory == -1){
 		__ASM("wfi");
-		if(game->pdir != STOP){
-			move(grid, game);
-		}
 		if(game->pills == 0 && game->power_pills == 0){
 			game->victory = 1;
 		}

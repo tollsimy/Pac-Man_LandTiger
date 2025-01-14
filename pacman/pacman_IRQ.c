@@ -75,8 +75,22 @@ static void calc_enemy_dir(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 }
 
 void pacman_timer_IRQ(){
-	//calc_enemy_dir(grid, &game);
-	
+	move(grid,&game);
+	//TODO: change enemy speed
+	if(!(counter % 2)){
+		calc_enemy_dir(grid, &game);
+		move_enemies(grid,&game);
+	}
+	uint8_t collision = check_collision(&game);
+	if(collision){
+		if(game.lifes > 1){
+			game.lifes--;
+			respawn_pacman(grid, &game);
+		}
+		else{
+			game.victory = 0;
+		}
+	}
 	if(counter == 9){
 		// decrement random power pills timer counter
 		if(game.pp_spawn_counter != 0){

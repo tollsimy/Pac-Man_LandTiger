@@ -69,6 +69,7 @@ volatile typedef struct {
 	int enemy_y[ENEMY_NUM];
 	dir_t pdir;
 	dir_t edir[ENEMY_NUM];
+	uint8_t enemy_fright;
 	dir_t next_pdir;
 	int8_t victory;
 	uint32_t pp_spawn_counter;
@@ -136,14 +137,14 @@ void render_ver_wall(char x, char y);
 void render_pill(char x, char y);
 void render_power_pill(char x, char y);
 void render_player(char x, char y, int angle);
-void render_enemy(char x, char y, int angle);
+void render_enemy(char x, char y, int angle, uint8_t fright);
 void render_gate(char x, char y);
 void render_stats(game_t* game);
 void update_stats_CAN(CAN_msg CAN_RxMsg, game_t* game);
 void update_time_CAN(CAN_msg CAN_RxMsg, game_t* game);
 void render_countdown(uint8_t count);
 void clear_countdown();
-void render_new_e_pos(int old_player_x, int old_player_y, int player_x, int player_y, cell_t prev_cell, int angle);
+void render_new_e_pos(int old_player_x, int old_player_y, int player_x, int player_y, cell_t prev_cell, int angle, uint8_t fright);
 void render_new_p_pos(int old_player_x, int old_player_y, int player_x, int player_y, int angle);
 void render_pause(char val);
 // reset.c
@@ -153,6 +154,10 @@ void wait_ready(game_t* game);
 void draw_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 // play.c
 uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+uint8_t check_collision(game_t* game);
+void respawn_pacman(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 char update_game_time(game_t* game);
 void spawn_random_pp(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);

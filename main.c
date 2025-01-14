@@ -9,7 +9,7 @@ static void InitSysTick(void);
 void SysTick_Handler(void);
 void Delay_SysTick(uint32_t SysTicks);
 
-int main (void) {
+ int main (void) {
 	SystemInit();
 	InitSysTick();
 	

@@ -27,6 +27,17 @@ const uint8_t pacman_2_sprite[8][8] = {
   {0, 0, 0, 1, 1, 1, 1, 1}  // Row 7
 };
 
+const uint8_t enemy_sprite[8][8] = {
+  {0, 1, 1, 1, 1, 1, 1, 0}, // Row 0
+  {0, 1, 1, 1, 0, 0, 1, 0}, // Row 1
+  {0, 1, 1, 1, 0, 0, 1, 0}, // Row 2
+  {0, 1, 1, 1, 1, 1, 1, 0}, // Row 3
+  {0, 1, 1, 1, 1, 1, 1, 0}, // Row 4
+  {1, 0, 1, 0, 1, 0, 1, 1}, // Row 5
+  {1, 0, 1, 0, 1, 0, 1, 1}, // Row 6
+  {1, 0, 1, 0, 1, 0, 1, 1}  // Row 7
+};
+
 const uint8_t l_heart_sprite[8][8] = {
   {0, 0, 1, 1, 1, 1, 0, 0}, // Row 0
   {0, 1, 1, 1, 1, 1, 1, 0}, // Row 1
@@ -158,17 +169,23 @@ void render_gate(char x, char y){
 	render_rect(GET_X(x), GET_Y(y), CELL_SIZE_X, CELL_SIZE_Y, Yellow);
 };
 
-void render_enemy(char x, char y, int angle) {
+void render_enemy(char x, char y, int angle, uint8_t fright) {
+	uint16_t color;
+	if(fright){
+		color = Blue;
+	} else {
+		color = Red;
+	}
 	static uint8_t toggle_img = 1;
 	uint8_t rotated[8][8];
 	if(toggle_img){
-		rotate_sprite(pacman_1_sprite, rotated, angle);
+		rotate_sprite(enemy_sprite, rotated, angle);
 		toggle_img = !toggle_img;
 	} else {
-		rotate_sprite(pacman_2_sprite, rotated, angle);
+		rotate_sprite(enemy_sprite, rotated, angle);
 		toggle_img = !toggle_img;
 	}
-	render_sprite(GET_X(x), GET_Y(y), rotated, Yellow);
+	render_sprite(GET_X(x), GET_Y(y), rotated, color);
 };
 
 void render_stats(game_t* game){
@@ -244,20 +261,22 @@ void clear_countdown(){
 	render_rect(96, 142, 48, 28, Black);
 };
 
-void render_new_e_pos(int old_enemy_x, int old_enemy_y, int enemy_x, int enemy_y, cell_t prev_cell, int angle){
+void render_new_e_pos(int old_enemy_x, int old_enemy_y, int enemy_x, int enemy_y, cell_t prev_cell, int angle, uint8_t fright){
 	int y = GET_Y(old_enemy_y);
 	int x = GET_X(old_enemy_x);
-	render_enemy(enemy_y, enemy_x, angle);
+	render_enemy(enemy_x, enemy_y, angle, fright);
 	switch (prev_cell){
 		case EMPTY:
 			render_rect(x, y, CELL_SIZE_X, CELL_SIZE_Y, Black);
 			break;
 		case PILL:
-			render_pill(old_enemy_y, old_enemy_x);
+			render_pill(old_enemy_x, old_enemy_y);
 			break;
 		case POWER_PILL:
-			render_power_pill(old_enemy_y, old_enemy_x);
+			render_power_pill(old_enemy_x, old_enemy_y);
 			break;
+		case PLAYER:
+			render_rect(x, y, CELL_SIZE_X, CELL_SIZE_Y, Black);
 		default:
 			break;
 	}

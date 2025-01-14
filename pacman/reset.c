@@ -16,6 +16,7 @@ void init_game(game_t* game){
 		game->enemy_y[i]= INITIAL_ENEMY_Y;
 		game->edir[i] = STOP;
 	}
+	game->enemy_fright = 0;
 	game->pdir = STOP;
 	game->next_pdir = STOP;
 	game->victory = -1;
