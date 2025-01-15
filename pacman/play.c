@@ -20,8 +20,12 @@ static void start_fright_timer(){
 	struct timer_configuration tc = {
 		.timer_n = TIMER_0,
 		.prescale = 0,
+		.mr0 = 0,
+		.configuration_mr0 = 0,
 		.mr1 = TIM_MS_TO_TICKS_SIMPLE(timer),
 		.configuration_mr1 = TIMER_INTERRUPT_MR | TIMER_RESET_MR | TIMER_STOP_MR,
+		.mr2 = 0,
+		.configuration_mr2 = 0,
 	};
 	init_timer(&tc);
 	enable_timer(0, PRIO_2);
@@ -43,11 +47,54 @@ char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		game->melody.melody = MELODY_P_PILL;
 		game->melody.length = sizeof(MELODY_P_PILL)/sizeof(MELODY_P_PILL[0]);
 		enable_melody();
+		for(int i=0; i<ENEMY_NUM;i++){
+			if(game->enemy->respawn[i]){
+				render_enemy(game->enemy->enemy_x[i], game->enemy->enemy_y[i], 0, game->enemy->enemy_fright);
+			}
+		}
 		game->enemy->enemy_fright = 1;
 		start_fright_timer();
 	}
-	if(prev_score != game->score && game->score % 1000 == 0 && game->score != 0){
-		game->lifes += 1;
+	
+	for(int i=0; i<ENEMY_NUM; i++){
+		if(check_collision(game, i)){
+			if(!game->enemy->enemy_fright){
+				if(game->lifes > 1){
+					game->lifes--;
+					respawn_pacman(grid, game);
+					respawn_enemy(grid, game, i);
+					game->melody.melody = MELODY_DEATH;
+					game->melody.length = sizeof(MELODY_DEATH)/sizeof(MELODY_DEATH[0]);
+					enable_melody();
+				}
+				else if (game->lifes == 1){
+					game->lifes--;
+#ifndef SIMULATOR
+					CAN_send_stats(game);
+					while(!CAN2_RX){
+						__ASM("wfi");
+					};
+					CAN2_RX = 0;
+#endif
+					update_stats_CAN(CAN_RxMsg, game);
+					game->victory = 0;
+				}
+			} else {
+				game->score += 100;
+				game->enemy->respawn[i] = 0;
+				respawn_enemy(grid,game, i);
+				game->melody.melody = MELODY_ENEMY_DEATH;
+				game->melody.length = sizeof(MELODY_ENEMY_DEATH)/sizeof(MELODY_ENEMY_DEATH[0]);
+				enable_melody();
+			}
+		}
+	}
+
+	if (prev_score / 1000 < game->score / 1000) {
+		game->lifes += (game->score / 1000) - (prev_score / 1000);
+		game->melody.melody = MELODY_LIFE;
+		game->melody.length = sizeof(MELODY_LIFE)/sizeof(MELODY_LIFE[0]);
+		enable_melody();
 	}
 	// victory, do not advance anymore when pills finished
 	if(game->pills == 0 && game->power_pills == 0){
@@ -193,7 +240,6 @@ void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 						cell_t prev_cell = grid[game->enemy->enemy_y[i]][game->enemy->enemy_x[i]];
 						grid[game->enemy->enemy_y[i]][game->enemy->enemy_x[i]] = ENEMY;
 						grid[old_enemy_y][old_enemy_x] = EMPTY;
-						// TODO: angle
 						render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy->enemy_x[i], game->enemy->enemy_y[i], prev_cell, 0, game->enemy->enemy_fright);
 					}
 					else {
@@ -204,10 +250,13 @@ void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 					game->enemy->enemy_x[i] = new_enemy_x;
 					game->enemy->enemy_y[i] = new_enemy_y;
 					
+					if(update_stats(grid, game)){
+						break;
+					}
+					
 					cell_t prev_cell = grid[game->enemy->enemy_y[i]][game->enemy->enemy_x[i]];
 					grid[game->enemy->enemy_y[i]][game->enemy->enemy_x[i]] = ENEMY;
 					grid[old_enemy_y][old_enemy_x] = prev_cell;
-					// TODO: angle
 					render_new_e_pos(old_enemy_x, old_enemy_y, game->enemy->enemy_x[i], game->enemy->enemy_y[i], prev_cell, 0, game->enemy->enemy_fright);
 				}
 				game->enemy->edir[i] = STOP;
@@ -226,10 +275,35 @@ uint8_t check_collision(game_t* game, uint8_t enemy_num){
 
 void respawn_pacman(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	grid[game->player->player_y][game->player->player_x] = EMPTY;
+	int old_player_x = game->player->player_x;
+	int old_player_y = game->player->player_y;
 	game->player->player_x = PLAYER_INITIAL_POS_X;
 	game->player->player_y = PLAYER_INITIAL_POS_Y;
 	grid[game->player->player_y][game->player->player_x] = PLAYER;
-	render_player(game->player->player_x, game->player->player_y, 0);
+	render_new_p_pos(old_player_x, old_player_y, game->player->player_x, game->player->player_y, 0);
+}
+
+void respawn_enemy(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game, uint8_t enemy_num){
+	game->enemy->enemy_x[enemy_num] = INITIAL_ENEMY_X;
+	game->enemy->enemy_y[enemy_num] = INITIAL_ENEMY_Y;
+	// reset frightened mode
+	game->enemy->enemy_fright = 0;
+
+	// timer 3s
+	uint32_t timer = 3000;
+	struct timer_configuration tc = {
+		.timer_n = TIMER_0,
+		.prescale = 0,
+		.mr0 = 0,
+		.configuration_mr0 = 0,
+		.mr1 = 0,
+		.configuration_mr1 = 0,
+		.mr2 = TIM_MS_TO_TICKS_SIMPLE(timer),
+		.configuration_mr2 = TIMER_INTERRUPT_MR | TIMER_RESET_MR | TIMER_STOP_MR,
+	};
+	init_timer(&tc);
+	reset_timer(0);
+	enable_timer(0, PRIO_2);
 }
 
 char update_game_time(game_t* game){
@@ -294,6 +368,10 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		.prescale = 0,
 		.mr0 = TIM_MS_TO_TICKS_SIMPLE(game_timer),
 		.configuration_mr0 = TIMER_INTERRUPT_MR | TIMER_RESET_MR,
+		.mr1 = 0,
+		.configuration_mr1 = 0,
+		.mr2 = 0,
+		.configuration_mr2 = 0,
 	};
 	init_timer(&tc);
 	
@@ -312,31 +390,30 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	
 	game->started = 1;
 	
-	//TODO: move to IRQ
 	while(game->victory == -1){
 		__ASM("wfi");
-		if(game->pills == 0 && game->power_pills == 0){
-			game->victory = 1;
-		}
-		if(game->time == 0){
-			game->victory = 0;
-		}
 	}
 	disable_timer(1);
 	return game->victory;
 }
 
-void win(){
+void win(game_t* game){
 	GUI_Text(100, 100, (uint8_t*) "Victory!", Yellow, Black);
 	GUI_Text(80, 120, (uint8_t*) "KEY1 to restart!", Yellow, Black);
+	game->melody.melody = MELODY_WIN;
+	game->melody.length = sizeof(MELODY_WIN)/sizeof(MELODY_WIN[0]);
+	enable_melody();
 	btn_flag &= ~FLAG_BUTTON_1;
 	while(!(btn_flag & FLAG_BUTTON_1)){ __ASM("wfi"); };
 	btn_flag &= ~FLAG_BUTTON_1;
 }
 
-void lose(){
+void lose(game_t* game){
 	GUI_Text(100, 100, (uint8_t*) "Game Over!", Yellow, Black);
 	GUI_Text(80, 120, (uint8_t*) "KEY1 to restart!", Yellow, Black);
+	game->melody.melody = MELODY_LOSE;
+	game->melody.length = sizeof(MELODY_LOSE)/sizeof(MELODY_LOSE[0]);
+	enable_melody();
 	btn_flag &= ~FLAG_BUTTON_1;
 	while(!(btn_flag & FLAG_BUTTON_1)){ __ASM("wfi"); };
 	btn_flag &= ~FLAG_BUTTON_1;

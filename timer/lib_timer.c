@@ -20,6 +20,10 @@ void delay_ms(uint32_t time_ms, uint16_t timer){
 		.prescale = 0,
 		.mr0 = TIM_MS_TO_TICKS_SIMPLE(time_ms),
 		.configuration_mr0 = 0,
+		.mr1 = 0,
+		.configuration_mr1 = 0,
+		.mr2 = 0,
+		.configuration_mr2 = 0,
 	};
 	init_timer(&tc);
 	reset_timer(tc.timer_n);

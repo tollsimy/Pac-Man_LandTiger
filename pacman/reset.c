@@ -15,6 +15,7 @@ void init_game(game_t* game){
 		game->enemy->enemy_x[i]= INITIAL_ENEMY_X;
 		game->enemy->enemy_y[i]= INITIAL_ENEMY_Y;
 		game->enemy->edir[i] = STOP;
+		game->enemy->respawn[i] = 1;
 	}
 	game->enemy->enemy_fright = 0;
 	game->enemy->enemy_delay = INITIAL_ENEMY_DELAY;

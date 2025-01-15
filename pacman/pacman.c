@@ -64,11 +64,11 @@ void pacman(void){
 				state = !!(play_game(grid,&game)) ? STATE_WIN : STATE_LOOSE;
 				break;
 			case STATE_WIN:
-				win();
+				win(&game);
 				state = STATE_RESET;
 				break;
 			case STATE_LOOSE:
-				lose();
+				lose(&game);
 				state = STATE_RESET;
 				break;
 		}

@@ -68,6 +68,7 @@ volatile typedef struct {
 volatile typedef struct {
 	int enemy_x[ENEMY_NUM];
 	int enemy_y[ENEMY_NUM];
+	uint8_t respawn[ENEMY_NUM];
 	dir_t edir[ENEMY_NUM];
 	uint8_t enemy_delay;
 	uint8_t enemy_fright;
@@ -135,8 +136,41 @@ static NOTE MELODY_PACMAN[] = {
 };
 
 static NOTE MELODY_P_PILL[] = {
+	{NOTE_C5, time_16th},
+	{NOTE_B6, time_16th},
+};
+
+static NOTE MELODY_DEATH[] = {
+	{NOTE_E5, time_16th},
+	{NOTE_B5, time_16th},
+};
+
+static NOTE MELODY_LIFE[] = {
 	{NOTE_A5, time_16th},
 	{NOTE_F5, time_16th},
+};
+
+static NOTE MELODY_ENEMY_DEATH[] = {
+	{NOTE_A5, time_16th},
+	{NOTE_F6, time_16th},
+};
+
+static NOTE MELODY_LOSE[] = {
+	{NOTE_A5, time_8th},
+	{NOTE_F5, time_8th},
+	{NOTE_D5, time_4th},
+	{NOTE_F5, time_8th},
+	{NOTE_E5, time_4th},
+};
+
+static NOTE MELODY_WIN[] = {
+	{NOTE_E5, time_16th},
+	{NOTE_G5, time_16th},
+	{NOTE_A5, time_16th},
+	{NOTE_B5, time_8th},
+	{NOTE_G5, time_16th},
+	{NOTE_A5, time_16th},
+	{NOTE_E5, time_4th},
 };
 
 //
@@ -169,15 +203,17 @@ void move(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 void move_enemies(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 uint8_t check_collision(game_t* game, uint8_t enemy_num);
 void respawn_pacman(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
+void respawn_enemy(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game, uint8_t enemy_num);
 char update_stats(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 char update_game_time(game_t* game);
 void spawn_random_pp(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game);
 void pause_handler(game_t* game);
-void win();
-void lose();
+void win(game_t* game);
+void lose(game_t* game);
 // pacman_IRQ.c
 void pacman_timer_IRQ();
 void pacman_fright_IRQ();
+void pacman_enemy_respawn_IRQ();
 // can.c
 void CAN_send_stats(game_t* game);
 // pacman_music.c

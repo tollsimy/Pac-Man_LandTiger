@@ -123,14 +123,17 @@ static dir_t a_star(game_t* game, cell_t grid[GRID_HEIGHT][GRID_WIDTH], int enem
 void calc_enemy_dir(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 	dir_t dir = STOP;
 	for(int i=0; i<ENEMY_NUM; i++){
-		// if still inside prison
-		if(game->enemy->enemy_y[i] >= 13 && game->enemy->enemy_y[i] <= 15 &&  game->enemy->enemy_x[i] >= 11 && game->enemy->enemy_x[i] <= 16){
-			// Just go up since spawn point static
-			dir = UP;
+		// only non blocked enemies can move
+		if(game->enemy->respawn[i]){
+			// if still inside prison
+			if(game->enemy->enemy_y[i] >= 13 && game->enemy->enemy_y[i] <= 15 &&  game->enemy->enemy_x[i] >= 11 && game->enemy->enemy_x[i] <= 16){
+				// Just go up since spawn point static
+				dir = UP;
+			}
+			else {
+				dir = a_star(game, grid, i);
+			}
+			game->enemy->edir[i] = dir;
 		}
-		else {
-			dir = a_star(game, grid, i);
-		}
-		game->enemy->edir[i] = dir;
 	}
 }

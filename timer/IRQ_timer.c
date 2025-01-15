@@ -4,6 +4,7 @@
 
 extern void pacman_timer_IRQ();
 extern void pacman_fright_IRQ();
+extern void pacman_enemy_respawn_IRQ();
 
 extern volatile double VOLUME;
 
@@ -15,7 +16,7 @@ void TIMER0_IRQHandler (void){
 	} else if(irq_source & IR_MR1) { // mr1
 		pacman_fright_IRQ();
 	} else if(irq_source & IR_MR2) { // mr2
-		
+		pacman_enemy_respawn_IRQ();
 	} else if(irq_source & IR_MR3) { // mr3
 		
 	}

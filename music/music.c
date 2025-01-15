@@ -2,7 +2,7 @@
 #include "../timer/timer.h"
 #include "../common.h"
 
-volatile double VOLUME = 0.3 * AMPLIFIER;
+volatile double VOLUME = 0.7 * AMPLIFIER;
 
 void playNote(NOTE note)
 {
