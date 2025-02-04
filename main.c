@@ -1,8 +1,6 @@
 #include "include.h"
 #include "common.h"
 
-#define RIT_PERIOD_MS 50U
-
 static volatile uint32_t Sys_Tick = 0;
 
 static void InitSysTick(void);

@@ -8,39 +8,33 @@ extern void pacman_enemy_respawn_IRQ();
 
 extern volatile double VOLUME;
 
-void TIMER0_IRQHandler (void){
-	uint8_t irq_source = LPC_TIM0->IR;
-	
-	if(irq_source & IR_MR0) { // mr0
+/*
+* NOTE: Repetitive timers only in MR0!
+*/
+
+void timer0_callback(uint8_t irq_src){
+	if(irq_src & IR_MR0) { // mr0
 		
-	} else if(irq_source & IR_MR1) { // mr1
+	} else if(irq_src & IR_MR1) { // mr1
 		pacman_fright_IRQ();
-	} else if(irq_source & IR_MR2) { // mr2
+	} else if(irq_src & IR_MR2) { // mr2
 		pacman_enemy_respawn_IRQ();
-	} else if(irq_source & IR_MR3) { // mr3
-		
+	} else if(irq_src & IR_MR3) { // mr3
+
 	}
-	
-	LPC_TIM0->IR = irq_source;
-	return;
 }
 
-void TIMER1_IRQHandler (void){
-	uint8_t irq_source = LPC_TIM1->IR;
-	
-	if(irq_source & IR_MR0) { // mr0
+void timer1_callback (uint8_t irq_src){
+	if(irq_src & IR_MR0) { // mr0
 		// Used only in game play state
 		pacman_timer_IRQ();
-	} else if(irq_source & IR_MR1) { // mr1
+	} else if(irq_src & IR_MR1) { // mr1
 		
-	} else if(irq_source & IR_MR2) { // mr2
+	} else if(irq_src & IR_MR2) { // mr2
 		
-	} else if(irq_source & IR_MR3) { // mr3
-		
-	}
+	} else if(irq_src & IR_MR3) { // mr3
 	
-	LPC_TIM1->IR = irq_source;
-	return;
+	}
 }
 
 uint16_t SinTable[45] =
@@ -53,42 +47,31 @@ uint16_t SinTable[45] =
 };
 
 int sineticks=0;
+void timer2_callback(uint8_t irq_src){
+	if(irq_src & IR_MR0) { // mr0
 
-void TIMER2_IRQHandler(void){
-	uint8_t irq_source = LPC_TIM2->IR;
-	
-	if(irq_source & IR_MR0) { // mr0
-
-	} else if(irq_source & IR_MR1) { // mr1
+	} else if(irq_src & IR_MR1) { // mr1
 		/* DAC management */
 		LPC_DAC->DACR = ((int)(SinTable[sineticks] * VOLUME)) << 6;
 		sineticks++;
 		if(sineticks==45) sineticks=0;
-	} else if(irq_source & IR_MR2) { // mr2
+	} else if(irq_src & IR_MR2) { // mr2
 		
-	} else if(irq_source & IR_MR3) { // mr3
-		
+	} else if(irq_src & IR_MR3) { // mr3
+
 	}
-	
-	LPC_TIM2->IR = irq_source;
-	return;
 }
 
-void TIMER3_IRQHandler (void){
-	uint8_t irq_source = LPC_TIM3->IR;
-	
-	if(irq_source & IR_MR0) { // mr0
+void timer3_callback(uint8_t irq_src){
+	if(irq_src & IR_MR0) { // mr0
 		
-	} else if(irq_source & IR_MR1) { // mr1
+	} else if(irq_src & IR_MR1) { // mr1
 		disable_timer(2);
-	} else if(irq_source & IR_MR2) { // mr2
+	} else if(irq_src & IR_MR2) { // mr2
 		
-	} else if(irq_source & IR_MR3) { // mr3
-		
-	}
+	} else if(irq_src & IR_MR3) { // mr3
 	
-	LPC_TIM3->IR = irq_source;
-	return;
+	}
 }
 
 /******************************************************************************

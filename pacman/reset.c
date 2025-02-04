@@ -36,7 +36,7 @@ void wait_ready(game_t* game){
 	enable_melody();
 	char press_str[25] = "Press KEY1 to start!";
 	GUI_Text(50,170, (uint8_t*)press_str, Red, White);
-	btn_flag &= ~FLAG_BUTTON_1;
-	while(!(btn_flag & FLAG_BUTTON_1)){ __ASM("wfi"); };
-	btn_flag &= ~FLAG_BUTTON_1;
+	btn_flag &= ~FLAG_BUTTON_1_SHORT;
+	while(!(btn_flag & FLAG_BUTTON_1_SHORT)){ __ASM("wfi"); };
+	btn_flag &= ~FLAG_BUTTON_1_SHORT;
 }

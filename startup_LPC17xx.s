@@ -210,10 +210,10 @@ Default_Handler PROC
 				EXPORT  CANActivity_IRQHandler    [WEAK]
 
 WDT_IRQHandler           
-TIMER0_IRQHandler         
-TIMER1_IRQHandler         
-TIMER2_IRQHandler         
-TIMER3_IRQHandler         
+TIMER0_IRQHandler
+TIMER1_IRQHandler
+TIMER2_IRQHandler
+TIMER3_IRQHandler
 UART0_IRQHandler          
 UART1_IRQHandler          
 UART2_IRQHandler          

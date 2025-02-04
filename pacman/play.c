@@ -27,7 +27,7 @@ static void start_fright_timer(){
 		.mr2 = 0,
 		.configuration_mr2 = 0,
 	};
-	init_timer(&tc);
+	init_timer(&tc, timer0_callback);
 	enable_timer(0, PRIO_2);
 }
 
@@ -301,7 +301,7 @@ void respawn_enemy(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game, uint8_t e
 		.mr2 = TIM_MS_TO_TICKS_SIMPLE(timer),
 		.configuration_mr2 = TIMER_INTERRUPT_MR | TIMER_RESET_MR | TIMER_STOP_MR,
 	};
-	init_timer(&tc);
+	init_timer(&tc, timer0_callback);
 	reset_timer(0);
 	enable_timer(0, PRIO_2);
 }
@@ -373,7 +373,7 @@ uint8_t play_game(cell_t grid[GRID_HEIGHT][GRID_WIDTH], game_t* game){
 		.mr2 = 0,
 		.configuration_mr2 = 0,
 	};
-	init_timer(&tc);
+	init_timer(&tc, timer1_callback);
 	
 	// random power pills seed init
 	srand(Sys_GetTick());
@@ -403,9 +403,9 @@ void win(game_t* game){
 	game->melody.melody = MELODY_WIN;
 	game->melody.length = sizeof(MELODY_WIN)/sizeof(MELODY_WIN[0]);
 	enable_melody();
-	btn_flag &= ~FLAG_BUTTON_1;
-	while(!(btn_flag & FLAG_BUTTON_1)){ __ASM("wfi"); };
-	btn_flag &= ~FLAG_BUTTON_1;
+	btn_flag &= ~FLAG_BUTTON_1_SHORT;
+	while(!(btn_flag & FLAG_BUTTON_1_SHORT)){ __ASM("wfi"); };
+	btn_flag &= ~FLAG_BUTTON_1_SHORT;
 }
 
 void lose(game_t* game){
@@ -414,7 +414,7 @@ void lose(game_t* game){
 	game->melody.melody = MELODY_LOSE;
 	game->melody.length = sizeof(MELODY_LOSE)/sizeof(MELODY_LOSE[0]);
 	enable_melody();
-	btn_flag &= ~FLAG_BUTTON_1;
-	while(!(btn_flag & FLAG_BUTTON_1)){ __ASM("wfi"); };
-	btn_flag &= ~FLAG_BUTTON_1;
+	btn_flag &= ~FLAG_BUTTON_1_SHORT;
+	while(!(btn_flag & FLAG_BUTTON_1_SHORT)){ __ASM("wfi"); };
+	btn_flag &= ~FLAG_BUTTON_1_SHORT;
 }

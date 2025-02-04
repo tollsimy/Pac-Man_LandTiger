@@ -6,15 +6,18 @@
 #include "../adc/adc.h"
 #include "../pacman/pacman.h"
 
+#define SHORT_PRESS_COUNT (SHORT_PRESS_MS / RIT_PERIOD_MS)
+#define LONG_PRESS_COUNT (LONG_PRESS_MS / RIT_PERIOD_MS)
+
 volatile uint32_t pressed_button_0 = 0;
 volatile uint32_t pressed_button_1 = 0;
 volatile uint32_t pressed_button_2 = 0;
 
-uint32_t pressed_joystick_up     = 0;
-uint32_t pressed_joystick_left   = 0;
-uint32_t pressed_joystick_right  = 0;
-uint32_t pressed_joystick_down   = 0;
-uint32_t pressed_joystick_select = 0;
+volatile uint32_t pressed_joystick_up     = 0;
+volatile uint32_t pressed_joystick_left   = 0;
+volatile uint32_t pressed_joystick_right  = 0;
+volatile uint32_t pressed_joystick_down   = 0;
+volatile uint32_t pressed_joystick_select = 0;
 
 volatile uint8_t joystick_flag = 0;
 volatile uint8_t btn_flag = 0;
@@ -92,19 +95,26 @@ void RIT_IRQHandler(void){
 	// -------------------------------
 	
 	if(pressed_button_0 != 0){
-		pressed_button_0++;
 		if(LPC_GPIO2->FIOPIN & (1 << 10)){
-			btn_flag |= FLAG_BUTTON_0;
-			
-			if(game.started){
-				game.pause = !game.pause;
-				pause_handler(&game);
+			if(pressed_button_0 >= SHORT_PRESS_COUNT){
+				// short press
+				btn_flag |= FLAG_BUTTON_0_SHORT;
+				if(game.started){
+					game.pause = !game.pause;
+					pause_handler(&game);
+				}
+				btn_flag &= ~FLAG_BUTTON_0_SHORT;
 			}
-			btn_flag &= ~FLAG_BUTTON_0;
-			
 			pressed_button_0 = 0;
 			NVIC_EnableIRQ(EINT0_IRQn);
 			LPC_PINCON->PINSEL4 |= (1 << 20);
+		} else {
+			if(pressed_button_0 >= LONG_PRESS_COUNT){
+				// long press
+				btn_flag |= FLAG_BUTTON_0_LONG;
+				pressed_button_0 = 0;
+			}
+			pressed_button_0++;
 		}
 	}
 	
@@ -113,14 +123,22 @@ void RIT_IRQHandler(void){
 	// -------------------------------
 	
 	if(pressed_button_1 != 0){
-			pressed_button_1++;
-			if(LPC_GPIO2->FIOPIN & (1 << 11)){
-				btn_flag |= FLAG_BUTTON_1;
-				
-				pressed_button_1 = 0;
-				NVIC_EnableIRQ(EINT1_IRQn);
-				LPC_PINCON->PINSEL4 |= (1 << 22);
+		if(LPC_GPIO2->FIOPIN & (1 << 11)){
+			if(pressed_button_1 >= SHORT_PRESS_COUNT){
+				// short press
+				btn_flag |= FLAG_BUTTON_1_SHORT;
 			}
+			pressed_button_1 = 0;
+			NVIC_EnableIRQ(EINT1_IRQn);
+			LPC_PINCON->PINSEL4 |= (1 << 22);
+		} else {
+			if(pressed_button_1 >= LONG_PRESS_COUNT){
+				// long press
+				btn_flag |= FLAG_BUTTON_1_LONG;
+				pressed_button_1 = 0;
+			}
+			pressed_button_1++;
+		}
 	}
 
 	// -------------------------------
@@ -128,14 +146,22 @@ void RIT_IRQHandler(void){
 	// -------------------------------
 	
 	if(pressed_button_2 != 0){
-			pressed_button_2++;
-			if(LPC_GPIO2->FIOPIN & (1 << 12)){
-				btn_flag |= FLAG_BUTTON_2;
-				
-				pressed_button_2 = 0;
-				NVIC_EnableIRQ(EINT2_IRQn);
-				LPC_PINCON->PINSEL4 |= (1 << 24);
+		if(LPC_GPIO2->FIOPIN & (1 << 12)){
+			if(pressed_button_2 >= SHORT_PRESS_COUNT){
+				// short press
+				btn_flag |= FLAG_BUTTON_2_SHORT;
 			}
+			pressed_button_2 = 0;
+			NVIC_EnableIRQ(EINT2_IRQn);
+			LPC_PINCON->PINSEL4 |= (1 << 24);
+		} else {
+			if(pressed_button_2 >= LONG_PRESS_COUNT){
+				// long press
+				btn_flag |= FLAG_BUTTON_2_LONG;
+				pressed_button_2 = 0;
+			}
+			pressed_button_2++;
+		}
 	}
 	
 	play_melody_note(game.melody.melody, game.melody.length);

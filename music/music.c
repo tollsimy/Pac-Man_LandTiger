@@ -9,11 +9,11 @@ void playNote(NOTE note)
 	if(note.freq != REST)
 	{
 		reset_timer(2);
-		init_timer_simplified(TIMER_2, 0, 0, note.freq, 0, TIMER_INTERRUPT_MR | TIMER_RESET_MR);
+		init_timer_simplified(TIMER_2, 0, 0, note.freq, 0, TIMER_INTERRUPT_MR | TIMER_RESET_MR, timer2_callback);
 		enable_timer(2, PRIO_0);
 	}
 	reset_timer(3);
-	init_timer_simplified(TIMER_3, 0, 0, note.duration, 0, TIMER_RESET_MR | TIMER_STOP_MR | TIMER_INTERRUPT_MR);
+	init_timer_simplified(TIMER_3, 0, 0, note.duration, 0, TIMER_RESET_MR | TIMER_STOP_MR | TIMER_INTERRUPT_MR, timer3_callback);
 	enable_timer(3, PRIO_0);
 }
 

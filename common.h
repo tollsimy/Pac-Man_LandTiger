@@ -14,6 +14,11 @@ extern volatile uint32_t SystemFrequency;
 #define PRIO_4 4U
 #define PRIO_5 5U
 
+#define RIT_PERIOD_MS 50U
+// Button and Joystick deboucing time
+#define SHORT_PRESS_MS 50U
+#define LONG_PRESS_MS 500U
+
 // Get Current Ticks
 uint32_t Sys_GetTick(void);
 /******************************************************************************
