@@ -163,8 +163,10 @@ void RIT_IRQHandler(void){
 			pressed_button_2++;
 		}
 	}
-	
+
+#ifndef SIMULATOR
 	play_melody_note(game.melody.melody, game.melody.length);
+#endif
 	
 	LPC_RIT->RICTRL |= 0x1;
 }
