@@ -27,22 +27,29 @@ void delay_ms(uint32_t time_ms, uint16_t timer){
 		.mr2 = 0,
 		.configuration_mr2 = 0,
 	};
+	
+	LPC_TIM_TypeDef* timer_struct;
 
 	timer_callback_t callback;
 	switch (timer){
 		case 0:
+			timer_struct = (LPC_TIM_TypeDef*)LPC_TIM0_BASE;
 			callback = timer0_callback;
 			break;
 		case 1:
+			timer_struct = (LPC_TIM_TypeDef*)LPC_TIM1_BASE;
 			callback = timer1_callback;
 			break;
 		case 2:
+			timer_struct = (LPC_TIM_TypeDef*)LPC_TIM2_BASE;
 			callback = timer2_callback;
 			break;
 		case 3:
+			timer_struct = (LPC_TIM_TypeDef*)LPC_TIM3_BASE;
 			callback = timer3_callback;
 			break;
 		default:
+			timer_struct = (LPC_TIM_TypeDef*)LPC_TIM0_BASE;
 			callback = timer0_callback;
 			break;
 	}
@@ -50,16 +57,10 @@ void delay_ms(uint32_t time_ms, uint16_t timer){
 	init_timer(&tc, callback);
 	reset_timer(tc.timer_n);
 	
-	uint32_t mr0 = tc.mr0;
-#ifdef SIMULATOR
-	// Read again match register in case of simulator
-	// because simulator scales the value
-	LPC_TIM_TypeDef* timer_struct = NULL;
-	mr0 = timer_struct->MR0;
-#endif
-	
 	enable_timer(tc.timer_n, PRIO_3);
-	while(timer_get_counter(tc.timer_n) < mr0);
+	// MR0 needs to be read again in case of simulator
+	// because it scales the value after write
+	while(timer_get_counter(tc.timer_n) < timer_struct->MR0);
 	disable_timer(tc.timer_n);
 }
 	
